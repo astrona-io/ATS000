@@ -1,0 +1,18 @@
+# Reference solution for ats-000-lab-010-01 — applied only by `astrona test`.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello
+  namespace: first-lab
+spec:
+  replicas: 2
+  selector:
+    matchLabels: {app: hello}
+  template:
+    metadata:
+      labels: {app: hello}
+    spec:
+      containers:
+        - name: web
+          image: nginx:1.27-alpine
+          ports: [{containerPort: 80}]

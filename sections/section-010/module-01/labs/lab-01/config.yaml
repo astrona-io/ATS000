@@ -1,0 +1,63 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+#
+# Your First Lab: Bring A Deployment Back To Life.
+# The first lab a new student takes: it teaches the loop every other lab uses
+# (astrona run → look → fix → astrona submit) on the smallest possible fault —
+# one mistyped image tag. Reference: https://cli.astrona.io/reference/lab-config/
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-000-lab-010-01
+  docs:
+    prerequisites: docs/prerequisites.md
+    examQuestion: docs/exam-question.md
+    caseStudy: docs/case-study.md
+    guide: docs/step-by-step-guide.md
+
+runtime:
+  type: kind
+  kind:
+    preloadImages:
+      - nginx:1.27-alpine        # the fixed image — no pull needed when the student repairs it
+
+# What the student starts with: a Deployment whose image tag has a typo, so
+# its pods sit in ImagePullBackOff.
+bootstrap:
+  manifests:
+    - name: first-lab namespace and the broken hello Deployment
+      type: folder
+      source: manifests/
+  waitFor:
+    - resource: nodes
+      all: true
+
+# The reference solution — only `astrona test` applies it.
+testing:
+  manifests:
+    - name: reference solution
+      type: folder
+      source: solution/
+  waitFor:
+    - resource: deploy/hello
+      namespace: first-lab
+
+validation:
+  checks:
+    - name: hello runs the image nginx:1.27-alpine
+      type: jsonpath
+      resource: deploy/hello -n first-lab
+      jsonpath: "{.spec.template.spec.containers[0].image}"
+      expect: "nginx:1.27-alpine"
+      points: 2
+      hint: "kubectl describe pod shows which image could not be pulled. Compare the image name with the task, letter by letter."
+    - name: hello still has 2 replicas
+      type: jsonpath
+      resource: deploy/hello -n first-lab
+      jsonpath: "{.spec.replicas}"
+      expect: "2"
+      hint: "Fix the image instead of scaling the Deployment down."
+    - name: Both hello pods are ready
+      type: jsonpath
+      resource: deploy/hello -n first-lab
+      jsonpath: "{.status.readyReplicas}"
+      expect: "2"
+      hint: "Run kubectl get pods -n first-lab and wait until both say Running and 1/1."
