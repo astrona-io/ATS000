@@ -280,8 +280,11 @@ landing page.
 - **Catalog labs need an account.** `astrona run ATS000/section-010/module-01/lab-01`
   (the catalog name) needs `astrona login` first. Labs run from files or a
   repository (`-c`, `--git`) do not.
-- **`astrona shell` leaves the learner's own terminal alone.** It opens a
-  shell with `KUBECONFIG` set to the lab's own file; `exit` leaves it.
+- **`astrona shell` does not change the learner's kubectl settings.** It
+  opens a shell with `KUBECONFIG` set to the lab's own file; `exit` leaves
+  it. Note that `astrona run` itself *does* make the lab's context
+  (`kind-<lab>`) the current one in the normal kubeconfig, unless
+  `--keep-context` is passed, and `astrona destroy` switches it back.
 - **After a passing `astrona submit`**, the tool asks whether to delete the
   lab cluster now. Pressing Enter deletes it, like `astrona destroy`.
 
