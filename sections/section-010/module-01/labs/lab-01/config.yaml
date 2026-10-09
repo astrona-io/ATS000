@@ -8,10 +8,10 @@ apiVersion: astrona.io/v1
 metadata:
   name: ats-000-lab-010-01
   docs:
+    examQuestion: question.md
+    guide: solution.md
     prerequisites: docs/prerequisites.md
-    examQuestion: docs/exam-question.md
     caseStudy: docs/case-study.md
-    guide: docs/step-by-step-guide.md
 
 runtime:
   type: kind

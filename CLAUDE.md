@@ -300,7 +300,7 @@ A lab folder holds:
 
 | Path | Purpose |
 | --- | --- |
-| `config.yaml` | Lab definition; `metadata.docs` points `question` and `examQuestion` at `question.md`, `solution` and `guide` at `solution.md`, plus `prerequisites` and `caseStudy` in `docs/` |
+| `config.yaml` | Lab definition; `apiVersion: astrona.io/v1`; `metadata.docs` points `examQuestion` at `question.md` and `guide` at `solution.md`, plus `prerequisites` and `caseStudy` in `docs/` (this schema rejects the older `question` and `solution` keys) |
 | `README.md` | Short intro with `estimated_duration` front matter and the run, submit and destroy commands |
 | `question.md` | The exam-style task. Starts with `# Question` and `Solve this question on: \`terminal\`` |
 | `solution.md` | Step-by-step walkthrough with real output |

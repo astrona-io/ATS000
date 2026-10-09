@@ -1,4 +1,14 @@
-# Astrona training manifest for ATS000.
+# Course manifest for ATS000 - Getting Started.
+#
+# One entry per section under `modules:`. Each section lists, in order: its
+# README, then for each module the landing page (course.md), its parts
+# (course-0N-*.md), and right after the part a lab tests, the lab's
+# question.md reading and the `type: lab` entry. The module's wrap-up page
+# comes last. A section capstone, when there is one, closes the section.
+# Playgrounds are not listed: the landing page's playground marker shows them.
+# solution.md is never listed.
+#
+# Every `path:` is relative to this file.
 
 training:
   id: ATS000
@@ -8,18 +18,44 @@ training:
     problems small enough to finish in minutes. Start here if you have never
     used the Astrona CLI, kubectl or a terminal much.
 
-sections:
-  - id: section-010
+modules:
+
+  - id: module-010
     title: "Your First Lab"
-    path: sections/section-010/README.md
-    modules:
-      - id: module-01
+    description: >
+      How an Astrona lab works, end to end, on the smallest possible problem:
+      start it, look at the cluster with kubectl, fix one thing, submit it for
+      grading and clean up.
+
+    content:
+      - type: reading
+        title: Section Overview
+        path: sections/section-010/README.md
+
+      - type: reading
         title: "The Lab Loop: Run, Look, Fix, Submit"
-        content:
-          - type: reading
-            title: "Module 1: The lab loop"
-            path: sections/section-010/module-01/course.md
-          - type: lab
-            title: "Your First Lab: Bring A Deployment Back To Life"
-            path: sections/section-010/module-01/labs/lab-01
-            difficulty: beginner
+        path: sections/section-010/module-01/course.md
+      - type: reading
+        title: Question
+        path: sections/section-010/module-01/labs/lab-01/question.md
+      - type: lab
+        title: "Your First Lab: Bring A Deployment Back To Life"
+        path: sections/section-010/module-01/labs/lab-01
+        difficulty: beginner
+        estimated_duration: 10m
+        topic: workloads
+        task_kind: troubleshooting
+        tags: [lab-loop, astrona-run, astrona-submit, kubectl-get, kubectl-describe, deployment, image-tag, imagepullbackoff]
+        learning_goals:
+          - Start, submit and remove a lab with the astrona command-line tool
+          - Read why a pod does not start from its status and its events
+          - Fix a Deployment's image so that every pod it owns is replaced and ready
+        resources:
+          - name: "Kubernetes Deployments"
+            url: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/
+          - name: "Kubernetes images"
+            url: https://kubernetes.io/docs/concepts/containers/images/
+          - name: "Debug pods"
+            url: https://kubernetes.io/docs/tasks/debug/debug-application/debug-pods/
+          - name: "kubectl set image"
+            url: https://kubernetes.io/docs/reference/kubectl/generated/kubectl_set/kubectl_set_image/
