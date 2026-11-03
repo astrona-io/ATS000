@@ -1,0 +1,60 @@
+# Starting state. crew has 1 replica and no tier label, and has no Service.
+# hauler asks for far too much memory (Pending). flicker overrides its
+# command with one that exits at once (crash loop).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: crew
+  namespace: orbit-lab
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: crew}
+  template:
+    metadata:
+      labels: {app: crew}
+    spec:
+      containers:
+        - name: web
+          image: nginx:1.27-alpine
+          ports: [{containerPort: 80}]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hauler
+  namespace: orbit-lab
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: hauler}
+  template:
+    metadata:
+      labels: {app: hauler}
+    spec:
+      containers:
+        - name: web
+          image: nginx:1.27-alpine
+          ports: [{containerPort: 80}]
+          resources:
+            requests:
+              memory: 512Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flicker
+  namespace: orbit-lab
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: flicker}
+  template:
+    metadata:
+      labels: {app: flicker}
+    spec:
+      containers:
+        - name: web
+          image: nginx:1.27-alpine
+          command: ["sh", "-c", "echo 'config file /etc/app/app.conf is missing' >&2; exit 1"]
+          ports: [{containerPort: 80}]

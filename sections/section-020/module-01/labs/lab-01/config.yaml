@@ -1,0 +1,98 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+#
+# Launch A Fleet From A File. UNTESTED: built and statically checked only.
+# A build lab: the planet `launch-lab` starts empty. The student writes a
+# Deployment and a Service in files and applies them.
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-000-lab-020-01-01
+  docs:
+    examQuestion: question.md
+    guide: solution.md
+    prerequisites: docs/prerequisites.md
+    caseStudy: docs/case-study.md
+
+runtime:
+  type: kind
+  kind:
+    preloadImages:
+      - nginx:1.27-alpine
+
+bootstrap:
+  manifests:
+    - name: launch-lab namespace
+      type: folder
+      source: manifests/
+  waitFor:
+    - resource: nodes
+      all: true
+
+testing:
+  manifests:
+    - name: reference solution
+      type: folder
+      source: solution/
+  waitFor:
+    - resource: deploy/relay
+      namespace: launch-lab
+
+validation:
+  checks:
+    - name: "relay runs the image nginx:1.27-alpine"
+      type: jsonpath
+      resource: deploy/relay -n launch-lab
+      jsonpath: "{.spec.template.spec.containers[0].image}"
+      expect: "nginx:1.27-alpine"
+      points: 2
+      hint: "The Deployment relay must exist in launch-lab. Check the image in your file."
+    - name: "relay asks for 3 replicas"
+      type: jsonpath
+      resource: deploy/relay -n launch-lab
+      jsonpath: "{.spec.replicas}"
+      expect: "3"
+      hint: "Set replicas: 3 in the Deployment file and apply it again."
+    - name: "All 3 relay pods are ready"
+      type: jsonpath
+      resource: deploy/relay -n launch-lab
+      jsonpath: "{.status.readyReplicas}"
+      expect: "3"
+      hint: "Run kubectl get pods -n launch-lab and wait until all pods say Running and 1/1."
+    - name: "relay pods carry the label tier=front"
+      type: jsonpath
+      resource: deploy/relay -n launch-lab
+      jsonpath: "{.spec.template.metadata.labels.tier}"
+      expect: "front"
+      hint: "Add tier: front to the labels in the pod template (spec.template.metadata.labels)."
+    - name: "relay pods carry the label app=relay"
+      type: jsonpath
+      resource: deploy/relay -n launch-lab
+      jsonpath: "{.spec.template.metadata.labels.app}"
+      expect: "relay"
+      hint: "The selector and the pod template labels must both use app: relay."
+    - name: "The container is named web"
+      type: jsonpath
+      resource: deploy/relay -n launch-lab
+      jsonpath: "{.spec.template.spec.containers[0].name}"
+      expect: "web"
+      hint: "Name the container web."
+    - name: "The container opens port 80"
+      type: jsonpath
+      resource: deploy/relay -n launch-lab
+      jsonpath: "{.spec.template.spec.containers[0].ports[0].containerPort}"
+      expect: "80"
+      hint: "Add containerPort: 80 to the container."
+    - name: "The Service relay selects app=relay"
+      type: jsonpath
+      resource: service/relay -n launch-lab
+      jsonpath: "{.spec.selector.app}"
+      expect: "relay"
+      hint: "Create a Service named relay in launch-lab with the selector app: relay."
+    - name: "The Service relay listens on port 80"
+      type: jsonpath
+      resource: service/relay -n launch-lab
+      jsonpath: "{.spec.ports[0].port}"
+      expect: "80"
+      hint: "Set port: 80 in the Service."
+
+teardown:
+  keepCluster: false

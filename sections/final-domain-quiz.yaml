@@ -1,0 +1,350 @@
+# Final knowledge check across both sections.
+schema_version: 1
+kind: question_bank
+id: ats000-final
+course_id: ATS000
+status: draft
+provenance: Original practice material written for this course.
+scope:
+  type: domain
+  id: getting-started
+  title: Getting Started
+questions:
+- id: ats000-final-q01
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Check that your computer is ready for labs with astrona setup
+    and astrona check
+  source_readings:
+  - sections/section-010/module-01/course-01-get-your-machine-ready.md
+  prompt: A lab will not start and you do not know why. Which command do you run first?
+  options:
+  - id: a
+    text: "`astrona submit`"
+    explanation: Submit grades a running lab. It does not check your machine.
+  - id: b
+    text: "`astrona check`"
+    explanation: Correct. It checks that the tools are installed, the container engine
+      is running and it has enough memory.
+  - id: c
+    text: "`kubectl get pods`"
+    explanation: There may be no cluster yet, so there is nothing for kubectl to ask.
+  - id: d
+    text: "`astrona destroy`"
+    explanation: Destroy removes a lab. It does not find why a lab will not start.
+  correct_option: b
+  explanation: It checks that the tools are installed, the container engine is running
+    and it has enough memory.
+- id: ats000-final-q02
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Send your work for grading with astrona submit, and remove the
+    lab with astrona destroy
+  source_readings:
+  - sections/section-010/module-01/course-02-the-four-steps-of-every-mission.md
+  prompt: What does the Proctor grade when you run `astrona submit`?
+  options:
+  - id: a
+    text: The commands you typed.
+    explanation: The Proctor does not read your history.
+  - id: b
+    text: The time you spent on the lab.
+    explanation: Time is not graded.
+  - id: c
+    text: Your terminal screen.
+    explanation: The Proctor does not look at your screen.
+  - id: d
+    text: The live cluster, as it is at that moment, check by check.
+    explanation: Correct. If you undo a fix by mistake, the check fails.
+  correct_option: d
+  explanation: If you undo a fix by mistake, the check fails.
+- id: ats000-final-q03
+  type: single_choice
+  difficulty: beginner
+  learning_objective: List the pods in a namespace with kubectl get pods, and read
+    the READY and STATUS columns
+  source_readings:
+  - sections/section-010/module-01/course-03-read-the-state-of-your-ships.md
+  prompt: The task says the app runs in the namespace `first-lab`, but `kubectl get
+    pods` shows no pods. What did you most likely forget?
+  options:
+  - id: a
+    text: To add `-n first-lab`.
+    explanation: Correct. Without `-n`, kubectl looks in the `default` namespace.
+  - id: b
+    text: To run `astrona submit`.
+    explanation: Submitting does not change what kubectl shows.
+  - id: c
+    text: To delete the Deployment.
+    explanation: That would remove the app.
+  - id: d
+    text: To restart the container engine.
+    explanation: The cluster is running. You only looked at the wrong namespace.
+  correct_option: a
+  explanation: Without `-n`, kubectl looks in the `default` namespace.
+- id: ats000-final-q04
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Find out why a pod does not start from the Events list of kubectl
+    describe pod
+  source_readings:
+  - sections/section-010/module-01/course-03-read-the-state-of-your-ships.md
+  prompt: A pod shows `0/1` and `ImagePullBackOff`. Where do you find the reason?
+  options:
+  - id: a
+    text: In the `RESTARTS` column.
+    explanation: That column counts restarts. It does not give reasons.
+  - id: b
+    text: In the Events at the bottom of `kubectl describe pod`.
+    explanation: Correct. The Events name the image that could not be pulled.
+  - id: c
+    text: In the name of the pod.
+    explanation: The pod name only holds the Deployment name and two codes.
+  - id: d
+    text: In `astrona list`.
+    explanation: That lists labs, not pods.
+  correct_option: b
+  explanation: The Events name the image that could not be pulled.
+- id: ats000-final-q05
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Fix a Deployment, not its pods, and watch it replace the pods
+    for you
+  source_readings:
+  - sections/section-010/module-01/course-03-read-the-state-of-your-ships.md
+  prompt: Why do you fix the Deployment and not the broken pods?
+  options:
+  - id: a
+    text: Pods cannot be deleted.
+    explanation: Pods can be deleted. The Deployment builds new ones.
+  - id: b
+    text: "`kubectl` cannot read pods."
+    explanation: kubectl reads pods well.
+  - id: c
+    text: The Deployment builds its pods from its own order, so a new pod would be
+      as broken as the old one.
+    explanation: Correct. Fix the order, and the controller replaces every pod.
+  - id: d
+    text: The grader only reads pod names.
+    explanation: The grader reads the live Deployment.
+  correct_option: c
+  explanation: Fix the order, and the controller replaces every pod.
+- id: ats000-final-q06
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Change the number of pods of a Deployment with kubectl scale,
+    and check the result with kubectl get deployment
+  source_readings:
+  - sections/section-020/module-01/course-01-scale-and-label-the-fleet.md
+  prompt: Which command changes the Deployment `crew` in `fleet-lab` to three pods?
+  options:
+  - id: a
+    text: "`kubectl scale deployment/crew --replicas=3 -n fleet-lab`"
+    explanation: Correct. It changes the `replicas` field of the Deployment.
+  - id: b
+    text: "`kubectl scale pod/crew --replicas=3 -n fleet-lab`"
+    explanation: A pod cannot be scaled. Scale the Deployment.
+  - id: c
+    text: "`kubectl get deployment crew --replicas=3`"
+    explanation: "`get` only reads. It does not change anything."
+  - id: d
+    text: "`kubectl label deployment/crew replicas=3`"
+    explanation: A label is only a tag. It does not change the number of pods.
+  correct_option: a
+  explanation: It changes the `replicas` field of the Deployment.
+- id: ats000-final-q07
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Explain how a Deployment finds its own pods with selector.matchLabels
+    and the pod template's labels
+  source_readings:
+  - sections/section-020/module-01/course-01-scale-and-label-the-fleet.md
+  prompt: Which setup is valid for a Deployment?
+  options:
+  - id: a
+    text: "`selector.matchLabels` is `app: crew` and the pod template labels are `app:
+      web`."
+    explanation: The selector must select the template's own pods, so Kubernetes rejects
+      this.
+  - id: b
+    text: No selector at all.
+    explanation: "`apps/v1` Deployments need a selector."
+  - id: c
+    text: "`selector.matchLabels` is `app: crew` and the pod template labels include
+      `app: crew`."
+    explanation: Correct. The Deployment finds its pods by the label it gives them.
+  - id: d
+    text: The selector is only a comment.
+    explanation: The selector decides which pods the Deployment owns.
+  correct_option: c
+  explanation: The Deployment finds its pods by the label it gives them.
+- id: ats000-final-q08
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Create a Service that sends traffic to the pods with a given
+    label, and check that it found them
+  source_readings:
+  - sections/section-020/module-01/course-02-describe-a-fleet-in-a-file.md
+  prompt: You applied a Service, but `kubectl get endpoints` shows `<none>`. What
+    is the most likely cause?
+  options:
+  - id: a
+    text: The Service selector matches no ready pod, for example because of a label
+      typo.
+    explanation: Correct. Compare the selector with the pod labels.
+  - id: b
+    text: The Service is too big.
+    explanation: Size is not a thing for a Service.
+  - id: c
+    text: The namespace is called `default`.
+    explanation: A Service in `default` works the same.
+  - id: d
+    text: "`kubectl apply` was run twice."
+    explanation: Applying twice does not break anything.
+  correct_option: a
+  explanation: Compare the selector with the pod labels.
+- id: ats000-final-q09
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Explain what the status Pending means and find its reason in
+    the Events of kubectl describe pod
+  source_readings:
+  - sections/section-020/module-02/course-01-pending-ships-no-room-on-the-launch-pad.md
+  prompt: A pod is `Pending` with `0` restarts. Where do you look for the reason?
+  options:
+  - id: a
+    text: In `kubectl logs`.
+    explanation: The container never started, so there is no log.
+  - id: b
+    text: In the `AGE` column.
+    explanation: That column only shows the age.
+  - id: c
+    text: In `astrona list`.
+    explanation: That lists labs.
+  - id: d
+    text: In the Events of `kubectl describe pod`, where a `FailedScheduling` event
+      says why.
+    explanation: Correct. For example `Insufficient memory`.
+  correct_option: d
+  explanation: For example `Insufficient memory`.
+- id: ats000-final-q10
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Read a container's log with kubectl logs, including the log
+    of the run before with --previous
+  source_readings:
+  - sections/section-020/module-02/course-02-crashing-ships-and-their-logs.md
+  prompt: A pod is in `CrashLoopBackOff`. Which command shows what its container printed
+    before it stopped?
+  options:
+  - id: a
+    text: "`kubectl scale`"
+    explanation: Scale changes a replica count.
+  - id: b
+    text: "`kubectl get namespaces`"
+    explanation: That lists namespaces.
+  - id: c
+    text: "`kubectl logs <pod> -n <namespace>`"
+    explanation: Correct. Add `--previous` to read the run before the latest one.
+  - id: d
+    text: "`kubectl label`"
+    explanation: Labels do not show output.
+  correct_option: c
+  explanation: Add `--previous` to read the run before the latest one.
+- id: ats000-final-q11
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Fix a bad container command in a Deployment with kubectl edit
+  source_readings:
+  - sections/section-020/module-02/course-02-crashing-ships-and-their-logs.md
+  prompt: A container's log says a file is missing, and the Deployment sets a `command`
+    that prints this and exits. What is the right fix?
+  options:
+  - id: a
+    text: Delete the pod again and again.
+    explanation: Every new pod crashes the same way.
+  - id: b
+    text: Remove the bad `command` from the Deployment so the image runs its own start
+      command.
+    explanation: Correct. Use `kubectl edit` or `kubectl patch` on the Deployment.
+  - id: c
+    text: Scale the Deployment to zero and leave it.
+    explanation: That hides the problem and does not fix it.
+  - id: d
+    text: Wait until the kubelet gives up.
+    explanation: The kubelet keeps restarting the container with longer waits.
+  correct_option: b
+  explanation: Use `kubectl edit` or `kubectl patch` on the Deployment.
+- id: ats000-final-q12
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Explain what CrashLoopBackOff means, and how it differs from
+    ImagePullBackOff
+  source_readings:
+  - sections/section-020/module-02/course-02-crashing-ships-and-their-logs.md
+  prompt: Match the status to the place to look first. Which pair is right?
+  options:
+  - id: a
+    text: "`Pending`: the log. `CrashLoopBackOff`: the Events."
+    explanation: This is the wrong way round. A Pending pod has no log.
+  - id: b
+    text: "`ImagePullBackOff`: the log. `Pending`: the exit code."
+    explanation: A pod that never pulled its image has no log or exit code.
+  - id: c
+    text: 'All three: the pod name.'
+    explanation: The name holds no reason.
+  - id: d
+    text: "`Pending` and `ImagePullBackOff`: the Events. `CrashLoopBackOff`: the log
+      and the exit code."
+    explanation: Correct.
+  correct_option: d
+  explanation: Correct.
+- id: ats000-final-q13
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Fix a Deployment, not its pods, and watch it replace the pods
+    for you
+  source_readings:
+  - sections/section-010/module-01/course-03-read-the-state-of-your-ships.md
+  prompt: A Deployment asks for 2 replicas and its image tag is misspelled. A teammate
+    scales it to 0 so that "the errors go away". Why is that not a fix?
+  options:
+  - id: a
+    text: The Deployment has no running pods, and the task still needs 2 ready replicas
+      with a working image.
+    explanation: Correct. Fewer broken pods are still a broken order.
+  - id: b
+    text: Scaling to 0 deletes the namespace.
+    explanation: Scaling does not delete a namespace.
+  - id: c
+    text: "`kubectl scale` only works on pods."
+    explanation: It works on Deployments.
+  - id: d
+    text: The grader cannot read a Deployment with 0 replicas.
+    explanation: The grader reads it, and the check for the ready count fails.
+  correct_option: a
+  explanation: Fewer broken pods are still a broken order.
+- id: ats000-final-q14
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Create a Service that sends traffic to the pods with a given
+    label, and check that it found them
+  source_readings:
+  - sections/section-020/module-01/course-02-describe-a-fleet-in-a-file.md
+  prompt: 'A Deployment''s pods have the labels `app: relay` and `tier: front`. Which
+    Service selector finds them?'
+  options:
+  - id: a
+    text: "`app: relays`"
+    explanation: A typo gives a selector that matches nothing.
+  - id: b
+    text: "`tier: back`"
+    explanation: No pod has this label.
+  - id: c
+    text: "`app: relay`"
+    explanation: Correct. A selector matches pods that carry all of its labels.
+  - id: d
+    text: "`name: relay`"
+    explanation: No pod has a `name` label.
+  correct_option: c
+  explanation: A selector matches pods that carry all of its labels.

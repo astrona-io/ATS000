@@ -1,0 +1,83 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+#
+# First Flight Check (CAPSTONE). UNTESTED: built and statically checked only.
+# Two planets, two broken fleet orders, two different mistakes in the image
+# name. The student uses the whole lab loop: look, read the events, fix both.
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-000-capstone-010
+  docs:
+    examQuestion: question.md
+    guide: solution.md
+    prerequisites: docs/prerequisites.md
+    caseStudy: docs/case-study.md
+
+runtime:
+  type: kind
+  kind:
+    preloadImages:
+      - nginx:1.27-alpine
+
+bootstrap:
+  manifests:
+    - name: dock and hangar namespaces with the broken scout and cargo Deployments
+      type: folder
+      source: manifests/
+  waitFor:
+    - resource: nodes
+      all: true
+
+testing:
+  manifests:
+    - name: reference solution
+      type: folder
+      source: solution/
+  waitFor:
+    - resource: deploy/scout
+      namespace: dock
+    - resource: deploy/cargo
+      namespace: hangar
+
+validation:
+  checks:
+    - name: "scout runs the image nginx:1.27-alpine"
+      type: jsonpath
+      resource: deploy/scout -n dock
+      jsonpath: "{.spec.template.spec.containers[0].image}"
+      expect: "nginx:1.27-alpine"
+      points: 2
+      hint: "The tag of the scout image is misspelled. kubectl describe pod -n dock shows the image that could not be pulled."
+    - name: "scout still has 2 replicas"
+      type: jsonpath
+      resource: deploy/scout -n dock
+      jsonpath: "{.spec.replicas}"
+      expect: "2"
+      hint: "Fix the image instead of scaling the Deployment."
+    - name: "All scout pods are ready"
+      type: jsonpath
+      resource: deploy/scout -n dock
+      jsonpath: "{.status.readyReplicas}"
+      expect: "2"
+      hint: "Fix the image and keep 2 replicas. Wait until kubectl get pods -n dock shows 2 pods Running and 1/1."
+    - name: "cargo runs the image nginx:1.27-alpine"
+      type: jsonpath
+      resource: deploy/cargo -n hangar
+      jsonpath: "{.spec.template.spec.containers[0].image}"
+      expect: "nginx:1.27-alpine"
+      points: 2
+      hint: "This time the name of the image is misspelled, not the tag. Read the event in kubectl describe pod -n hangar."
+    - name: "cargo still has 3 replicas"
+      type: jsonpath
+      resource: deploy/cargo -n hangar
+      jsonpath: "{.spec.replicas}"
+      expect: "3"
+      hint: "Fix the image instead of scaling the Deployment."
+    - name: "All cargo pods are ready"
+      type: jsonpath
+      resource: deploy/cargo -n hangar
+      jsonpath: "{.status.readyReplicas}"
+      expect: "3"
+      hint: "Fix the image and keep 3 replicas. Wait until kubectl get pods -n hangar shows 3 pods Running and 1/1."
+
+teardown:
+  keepCluster: false

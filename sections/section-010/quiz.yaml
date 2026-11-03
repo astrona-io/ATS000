@@ -1,0 +1,255 @@
+# Knowledge check for section 010. Listed in astrona.yaml as a `type: quiz` entry after the capstone lab.
+schema_version: 1
+kind: question_bank
+id: ats000-010
+course_id: ATS000
+status: draft
+provenance: Original practice material written for this course.
+scope:
+  type: section
+  id: section-010
+  title: Your First Lab
+questions:
+- id: ats000-010-q01
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Check that your computer is ready for labs with astrona setup
+    and astrona check
+  source_readings:
+  - sections/section-010/module-01/course-01-get-your-machine-ready.md
+  prompt: A lab will not start and you do not know why. Which command do you run first?
+  options:
+  - id: a
+    text: "`astrona submit`"
+    explanation: Submit grades a running lab. It does not check your machine.
+  - id: b
+    text: "`astrona check`"
+    explanation: Correct. It checks that the tools are installed, the container engine
+      is running and it has enough memory.
+  - id: c
+    text: "`kubectl get pods`"
+    explanation: There may be no cluster yet, so there is nothing for kubectl to ask.
+  - id: d
+    text: "`astrona destroy`"
+    explanation: Destroy removes a lab. It does not find why a lab will not start.
+  correct_option: b
+  explanation: It checks that the tools are installed, the container engine is running
+    and it has enough memory.
+- id: ats000-010-q02
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Name the four tools a lab uses and say what each one does
+  source_readings:
+  - sections/section-010/module-01/course-01-get-your-machine-ready.md
+  prompt: Which tool builds the Kubernetes cluster for a lab inside the container
+    engine?
+  options:
+  - id: a
+    text: "`kubectl`"
+    explanation: kubectl is the radio you use to look at the cluster. It does not
+      build it.
+  - id: b
+    text: "`kind`"
+    explanation: Correct. The astrona tool asks kind to build the cluster out of containers
+      in Docker or Podman.
+  - id: c
+    text: Podman
+    explanation: Podman is the container engine that holds the cluster. It does not
+      build the cluster.
+  - id: d
+    text: The Proctor
+    explanation: The Proctor grades your work. It does not build clusters.
+  correct_option: b
+  explanation: The astrona tool asks kind to build the cluster out of containers in
+    Docker or Podman.
+- id: ats000-010-q03
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Start a lab with astrona run, and open a shell for it with astrona
+    shell
+  source_readings:
+  - sections/section-010/module-01/course-02-the-four-steps-of-every-mission.md
+  prompt: What does `astrona shell` do?
+  options:
+  - id: a
+    text: It grades the lab.
+    explanation: Grading is `astrona submit`.
+  - id: b
+    text: It removes the lab.
+    explanation: Removing is `astrona destroy`.
+  - id: c
+    text: It opens a shell where `kubectl` talks only to the lab's cluster.
+    explanation: Correct. Your own kubectl settings stay as they were, and `exit`
+      leaves the shell.
+  - id: d
+    text: It installs kubectl.
+    explanation: Installing tools is `astrona setup`.
+  correct_option: c
+  explanation: Your own kubectl settings stay as they were, and `exit` leaves the
+    shell.
+- id: ats000-010-q04
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Send your work for grading with astrona submit, and remove the
+    lab with astrona destroy
+  source_readings:
+  - sections/section-010/module-01/course-02-the-four-steps-of-every-mission.md
+  prompt: What does the Proctor grade when you run `astrona submit`?
+  options:
+  - id: a
+    text: The commands you typed.
+    explanation: The Proctor does not read your history.
+  - id: b
+    text: The time you spent on the lab.
+    explanation: Time is not graded.
+  - id: c
+    text: Your terminal screen.
+    explanation: The Proctor does not look at your screen.
+  - id: d
+    text: The live cluster, as it is at that moment, check by check.
+    explanation: Correct. If you undo a fix by mistake, the check fails.
+  correct_option: d
+  explanation: If you undo a fix by mistake, the check fails.
+- id: ats000-010-q05
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Send your work for grading with astrona submit, and remove the
+    lab with astrona destroy
+  source_readings:
+  - sections/section-010/module-01/course-02-the-four-steps-of-every-mission.md
+  prompt: You submit and one check fails with a hint. What do you do?
+  options:
+  - id: a
+    text: Read the hint, look at the cluster again, fix it and submit again.
+    explanation: Correct. You can submit as often as you like.
+  - id: b
+    text: Run `astrona destroy` and give up.
+    explanation: Destroying the lab throws away your work and the chance to pass.
+  - id: c
+    text: Wait. The grader tries again on its own.
+    explanation: The Proctor only runs when you submit.
+  - id: d
+    text: Restart your computer.
+    explanation: The cluster state is what counts, not your computer.
+  correct_option: a
+  explanation: You can submit as often as you like.
+- id: ats000-010-q06
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Send your work for grading with astrona submit, and remove the
+    lab with astrona destroy
+  source_readings:
+  - sections/section-010/module-01/course-02-the-four-steps-of-every-mission.md
+  prompt: Which command lists the labs and playgrounds that are still running on your
+    computer?
+  options:
+  - id: a
+    text: "`astrona check`"
+    explanation: Check looks at your machine, not at running labs.
+  - id: b
+    text: "`kubectl get namespaces`"
+    explanation: That lists namespaces inside one cluster.
+  - id: c
+    text: "`astrona docs`"
+    explanation: Docs shows lab documents.
+  - id: d
+    text: "`astrona list`"
+    explanation: Correct. A forgotten lab keeps using memory, so run it at the end
+      of a session.
+  correct_option: d
+  explanation: A forgotten lab keeps using memory, so run it at the end of a session.
+- id: ats000-010-q07
+  type: single_choice
+  difficulty: beginner
+  learning_objective: List the pods in a namespace with kubectl get pods, and read
+    the READY and STATUS columns
+  source_readings:
+  - sections/section-010/module-01/course-03-read-the-state-of-your-ships.md
+  prompt: The task says the app runs in the namespace `first-lab`, but `kubectl get
+    pods` shows no pods. What did you most likely forget?
+  options:
+  - id: a
+    text: To add `-n first-lab`.
+    explanation: Correct. Without `-n`, kubectl looks in the `default` namespace.
+  - id: b
+    text: To run `astrona submit`.
+    explanation: Submitting does not change what kubectl shows.
+  - id: c
+    text: To delete the Deployment.
+    explanation: That would remove the app.
+  - id: d
+    text: To restart the container engine.
+    explanation: The cluster is running. You only looked at the wrong namespace.
+  correct_option: a
+  explanation: Without `-n`, kubectl looks in the `default` namespace.
+- id: ats000-010-q08
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Find out why a pod does not start from the Events list of kubectl
+    describe pod
+  source_readings:
+  - sections/section-010/module-01/course-03-read-the-state-of-your-ships.md
+  prompt: A pod shows `0/1` and `ImagePullBackOff`. Where do you find the reason?
+  options:
+  - id: a
+    text: In the `RESTARTS` column.
+    explanation: That column counts restarts. It does not give reasons.
+  - id: b
+    text: In the Events at the bottom of `kubectl describe pod`.
+    explanation: Correct. The Events name the image that could not be pulled.
+  - id: c
+    text: In the name of the pod.
+    explanation: The pod name only holds the Deployment name and two codes.
+  - id: d
+    text: In `astrona list`.
+    explanation: That lists labs, not pods.
+  correct_option: b
+  explanation: The Events name the image that could not be pulled.
+- id: ats000-010-q09
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Fix a Deployment, not its pods, and watch it replace the pods
+    for you
+  source_readings:
+  - sections/section-010/module-01/course-03-read-the-state-of-your-ships.md
+  prompt: Why do you fix the Deployment and not the broken pods?
+  options:
+  - id: a
+    text: Pods cannot be deleted.
+    explanation: Pods can be deleted. The Deployment builds new ones.
+  - id: b
+    text: "`kubectl` cannot read pods."
+    explanation: kubectl reads pods well.
+  - id: c
+    text: The Deployment builds its pods from its own order, so a new pod would be
+      as broken as the old one.
+    explanation: Correct. Fix the order, and the controller replaces every pod.
+  - id: d
+    text: The grader only reads pod names.
+    explanation: The grader reads the live Deployment.
+  correct_option: c
+  explanation: Fix the order, and the controller replaces every pod.
+- id: ats000-010-q10
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Explain the two parts of a container image name, the name and
+    the tag
+  source_readings:
+  - sections/section-010/module-01/course-03-read-the-state-of-your-ships.md
+  prompt: 'The Events say `Failed to pull image "nginx:1.27-alpne": not found`. What
+    is wrong?'
+  options:
+  - id: a
+    text: The image name `nginx` does not exist.
+    explanation: nginx exists. The tag after the colon is the problem.
+  - id: b
+    text: The tag `1.27-alpne` does not exist. It is a misspelling of `1.27-alpine`.
+    explanation: Correct. A tag that does not exist cannot be pulled.
+  - id: c
+    text: The pod has too little memory.
+    explanation: That would give a different event.
+  - id: d
+    text: The namespace is missing.
+    explanation: The pod exists, so its namespace exists.
+  correct_option: b
+  explanation: A tag that does not exist cannot be pulled.

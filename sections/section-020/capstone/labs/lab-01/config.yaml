@@ -1,0 +1,115 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+#
+# Fleet Recovery (CAPSTONE). UNTESTED: built and statically checked only.
+# One planet with three fleets: `crew` must be scaled, labelled and given a
+# Service; `hauler` is Pending; `flicker` crash-loops.
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-000-capstone-020
+  docs:
+    examQuestion: question.md
+    guide: solution.md
+    prerequisites: docs/prerequisites.md
+    caseStudy: docs/case-study.md
+
+runtime:
+  type: kind
+  kind:
+    preloadImages:
+      - nginx:1.27-alpine
+
+bootstrap:
+  manifests:
+    - name: orbit-lab namespace with crew, hauler and flicker
+      type: folder
+      source: manifests/
+  waitFor:
+    - resource: nodes
+      all: true
+
+testing:
+  manifests:
+    - name: reference solution
+      type: folder
+      source: solution/
+  waitFor:
+    - resource: deploy/crew
+      namespace: orbit-lab
+    - resource: deploy/hauler
+      namespace: orbit-lab
+    - resource: deploy/flicker
+      namespace: orbit-lab
+
+validation:
+  checks:
+    - name: "crew asks for 3 replicas"
+      type: jsonpath
+      resource: deploy/crew -n orbit-lab
+      jsonpath: "{.spec.replicas}"
+      expect: "3"
+      hint: "Scale the crew Deployment to 3 with kubectl scale."
+    - name: "All 3 crew pods are ready"
+      type: jsonpath
+      resource: deploy/crew -n orbit-lab
+      jsonpath: "{.status.readyReplicas}"
+      expect: "3"
+      hint: "Wait until kubectl get pods -n orbit-lab -l app=crew shows 3 pods Running and 1/1."
+    - name: "crew pods carry the label tier=front"
+      type: jsonpath
+      resource: deploy/crew -n orbit-lab
+      jsonpath: "{.spec.template.metadata.labels.tier}"
+      expect: "front"
+      hint: "Add tier: front to the pod template labels (kubectl edit or kubectl patch). Keep app: crew."
+    - name: "crew pods still carry the label app=crew"
+      type: jsonpath
+      resource: deploy/crew -n orbit-lab
+      jsonpath: "{.spec.template.metadata.labels.app}"
+      expect: "crew"
+      hint: "Do not remove app: crew from the pod template."
+    - name: "The Service crew selects app=crew"
+      type: jsonpath
+      resource: service/crew -n orbit-lab
+      jsonpath: "{.spec.selector.app}"
+      expect: "crew"
+      hint: "Create a Service named crew in orbit-lab with the selector app: crew."
+    - name: "The Service crew listens on port 80"
+      type: jsonpath
+      resource: service/crew -n orbit-lab
+      jsonpath: "{.spec.ports[0].port}"
+      expect: "80"
+      hint: "Set port: 80 in the Service."
+    - name: "hauler pod is ready"
+      type: jsonpath
+      resource: deploy/hauler -n orbit-lab
+      jsonpath: "{.status.readyReplicas}"
+      expect: "1"
+      points: 2
+      hint: "kubectl describe pod shows why the pod is Pending. Lower the memory request of the hauler container."
+    - name: "hauler still has 1 replica"
+      type: jsonpath
+      resource: deploy/hauler -n orbit-lab
+      jsonpath: "{.spec.replicas}"
+      expect: "1"
+      hint: "Fix the request instead of changing the replicas."
+    - name: "flicker pod is ready"
+      type: jsonpath
+      resource: deploy/flicker -n orbit-lab
+      jsonpath: "{.status.readyReplicas}"
+      expect: "1"
+      points: 2
+      hint: "kubectl logs shows why the container stops. Look at its command in the Deployment."
+    - name: "flicker still has 1 replica"
+      type: jsonpath
+      resource: deploy/flicker -n orbit-lab
+      jsonpath: "{.spec.replicas}"
+      expect: "1"
+      hint: "Fix the container instead of changing the replicas."
+  scripts:
+    - name: flicker-runs-the-image-default
+      description: "flicker runs the normal nginx start command, with no command or args override"
+      type: file
+      source: validation/validate-flicker-default-command.sh
+      hint: "Remove the command (and any args) from the flicker container instead of replacing it."
+
+teardown:
+  keepCluster: false

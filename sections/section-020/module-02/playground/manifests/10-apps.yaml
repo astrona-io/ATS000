@@ -1,0 +1,43 @@
+# hauler asks for far more memory than any launch pad has, so its pod stays
+# Pending. flicker overrides the container command with one that exits at
+# once, so its pod crashes again and again (CrashLoopBackOff). Both are left
+# broken on purpose.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hauler
+  namespace: rescue-lab
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: hauler}
+  template:
+    metadata:
+      labels: {app: hauler}
+    spec:
+      containers:
+        - name: web
+          image: nginx:1.27-alpine
+          ports: [{containerPort: 80}]
+          resources:
+            requests:
+              memory: 512Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flicker
+  namespace: rescue-lab
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: flicker}
+  template:
+    metadata:
+      labels: {app: flicker}
+    spec:
+      containers:
+        - name: web
+          image: nginx:1.27-alpine
+          command: ["sh", "-c", "echo 'config file /etc/app/app.conf is missing' >&2; exit 1"]
+          ports: [{containerPort: 80}]

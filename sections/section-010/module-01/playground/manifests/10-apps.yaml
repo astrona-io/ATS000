@@ -1,0 +1,37 @@
+# hello is healthy. relay has a typo in its image tag ("alpne"), so its pod
+# waits in ImagePullBackOff. The playground leaves it broken on purpose.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello
+  namespace: first-lab
+spec:
+  replicas: 2
+  selector:
+    matchLabels: {app: hello}
+  template:
+    metadata:
+      labels: {app: hello}
+    spec:
+      containers:
+        - name: web
+          image: nginx:1.27-alpine
+          ports: [{containerPort: 80}]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: relay
+  namespace: first-lab
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: relay}
+  template:
+    metadata:
+      labels: {app: relay}
+    spec:
+      containers:
+        - name: web
+          image: nginx:1.27-alpne
+          ports: [{containerPort: 80}]

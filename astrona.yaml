@@ -1,25 +1,209 @@
-# Astrona training manifest for ATS000.
+# Course manifest for ATS000 - Getting Started.
+#
+# One entry per section under `modules:`. Each section lists, in order: its
+# README, then for each module the landing page (course.md), its parts
+# (course-0N-*.md), and right after the part a lab tests, the lab's
+# question.md reading and the `type: lab` entry. The module's summary page
+# comes last. The section capstone, with its quiz, closes the section.
+# Playgrounds are not listed: the landing page's playground marker shows them.
+# solution.md is never listed.
+#
+# Every `path:` is relative to this file.
 
 training:
   id: ATS000
   title: Getting Started
   description: >
     Your first Astrona labs: how a lab is started, worked on and graded, on
-    problems small enough to finish in minutes. Start here if you have never
-    used the Astrona CLI, kubectl or a terminal much.
+    problems small enough to finish in minutes, then how to scale, label and
+    launch a fleet from a file and how to find why pods stay Pending or crash.
+    Start here if you have never used the Astrona CLI, kubectl or a terminal
+    much. Each module pairs a reader with an ungraded playground, and each
+    section closes with a capstone and a knowledge check.
 
-sections:
-  - id: section-010
+modules:
+
+  - id: module-010
     title: "Your First Lab"
-    path: sections/section-010/README.md
-    modules:
-      - id: module-01
+    description: >
+      How an Astrona lab works, end to end, on the smallest possible problem:
+      start it, look at the cluster with kubectl, fix one thing, submit it for
+      grading and clean up.
+
+    content:
+      - type: reading
+        title: Section Overview
+        path: sections/section-010/README.md
+
+      - type: reading
         title: "The Lab Loop: Run, Look, Fix, Submit"
-        content:
-          - type: reading
-            title: "Module 1: The lab loop"
-            path: sections/section-010/module-01/course.md
-          - type: lab
-            title: "Your First Lab: Bring A Deployment Back To Life"
-            path: sections/section-010/module-01/labs/lab-01
-            difficulty: beginner
+        path: sections/section-010/module-01/course.md
+      - type: reading
+        title: "Get Your Machine Ready"
+        path: sections/section-010/module-01/course-01-get-your-machine-ready.md
+      - type: reading
+        title: "The Four Steps Of Every Mission"
+        path: sections/section-010/module-01/course-02-the-four-steps-of-every-mission.md
+      - type: reading
+        title: "Read The State Of Your Ships"
+        path: sections/section-010/module-01/course-03-read-the-state-of-your-ships.md
+      - type: reading
+        title: Question
+        path: sections/section-010/module-01/labs/lab-01/question.md
+      - type: lab
+        title: "Your First Lab: Bring A Deployment Back To Life"
+        path: sections/section-010/module-01/labs/lab-01
+        difficulty: beginner
+        estimated_duration: 10m
+        topic: workloads
+        task_kind: troubleshooting
+        tags: [lab-loop, astrona-run, astrona-submit, kubectl-get, kubectl-describe, deployment, image-tag, imagepullbackoff]
+        learning_goals:
+          - Start, submit and remove a lab with the astrona command-line tool
+          - Read why a pod does not start from its status and its events
+          - Fix a Deployment's image so that every pod it owns is replaced and ready
+        resources:
+          - name: "Kubernetes Deployments"
+            url: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/
+          - name: "Kubernetes images"
+            url: https://kubernetes.io/docs/concepts/containers/images/
+          - name: "Debug pods"
+            url: https://kubernetes.io/docs/tasks/debug/debug-application/debug-pods/
+          - name: "kubectl set image"
+            url: https://kubernetes.io/docs/reference/kubectl/generated/kubectl_set/kubectl_set_image/
+      - type: reading
+        title: Summary
+        path: sections/section-010/module-01/course-04-summary.md
+
+      - type: reading
+        title: Question
+        path: sections/section-010/capstone/labs/lab-01/question.md
+      - type: lab
+        title: "First Flight Check"
+        path: sections/section-010/capstone/labs/lab-01
+        difficulty: beginner
+        estimated_duration: 15m
+        topic: workloads
+        task_kind: troubleshooting
+        tags: [lab-loop, astrona-submit, namespace, deployment, image-tag, image-pull, kubectl-describe, imagepullbackoff]
+        learning_goals:
+          - Find a misspelled image tag and a misspelled image name in two namespaces
+          - Fix two Deployments with kubectl set image while keeping their replica counts
+        resources:
+          - name: "Kubernetes images"
+            url: https://kubernetes.io/docs/concepts/containers/images/
+          - name: "Debug pods"
+            url: https://kubernetes.io/docs/tasks/debug/debug-application/debug-pods/
+      - type: quiz
+        title: "Knowledge Check: Your First Lab"
+        path: sections/section-010/quiz.yaml
+        pass_score: 70
+
+  - id: module-020
+    title: "Change And Repair The Fleet"
+    description: >
+      Makes the reader able to change a running fleet and to tell the common
+      ways a pod gets stuck apart. It follows the first section because it
+      uses the same loop and the same kubectl reading skills, on bigger
+      problems.
+
+    content:
+      - type: reading
+        title: Section Overview
+        path: sections/section-020/README.md
+
+      - type: reading
+        title: "Scale, Label And Launch From A File"
+        path: sections/section-020/module-01/course.md
+      - type: reading
+        title: "Scale And Label The Fleet"
+        path: sections/section-020/module-01/course-01-scale-and-label-the-fleet.md
+      - type: reading
+        title: "Describe A Fleet In A File"
+        path: sections/section-020/module-01/course-02-describe-a-fleet-in-a-file.md
+      - type: reading
+        title: Question
+        path: sections/section-020/module-01/labs/lab-01/question.md
+      - type: lab
+        title: "Launch A Fleet From A File"
+        path: sections/section-020/module-01/labs/lab-01
+        difficulty: beginner
+        estimated_duration: 15m
+        topic: configuration
+        task_kind: build
+        tags: [namespace, deployment, labels, replicas, kubectl-apply, container, pod, ready-count]
+        learning_goals:
+          - Write a Deployment and a Service in YAML files and apply them
+          - Match a selector with the labels of the pod template
+        resources:
+          - name: "Kubernetes Deployments"
+            url: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/
+          - name: "Kubernetes Services"
+            url: https://kubernetes.io/docs/concepts/services-networking/service/
+          - name: "Labels and selectors"
+            url: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+      - type: reading
+        title: Summary
+        path: sections/section-020/module-01/course-03-summary.md
+
+      - type: reading
+        title: "Find Why Ships Will Not Fly"
+        path: sections/section-020/module-02/course.md
+      - type: reading
+        title: "Pending Ships: No Room On The Launch Pad"
+        path: sections/section-020/module-02/course-01-pending-ships-no-room-on-the-launch-pad.md
+      - type: reading
+        title: "Crashing Ships And Their Logs"
+        path: sections/section-020/module-02/course-02-crashing-ships-and-their-logs.md
+      - type: reading
+        title: Question
+        path: sections/section-020/module-02/labs/lab-01/question.md
+      - type: lab
+        title: "Rescue Two Stuck Ships"
+        path: sections/section-020/module-02/labs/lab-01
+        difficulty: intermediate
+        estimated_duration: 15m
+        topic: workloads
+        task_kind: troubleshooting
+        tags: [pending, crashloopbackoff, pod-status, events, kubectl-describe, kubectl-logs, kubectl-edit, deployment]
+        learning_goals:
+          - Find why a pod is Pending from its Events and lower its memory request
+          - Find why a container crashes from its log and remove the bad command
+        resources:
+          - name: "Debug pods"
+            url: https://kubernetes.io/docs/tasks/debug/debug-application/debug-pods/
+          - name: "Resource management for pods and containers"
+            url: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+          - name: "kubectl logs"
+            url: https://kubernetes.io/docs/reference/kubectl/generated/kubectl_logs/
+      - type: reading
+        title: Summary
+        path: sections/section-020/module-02/course-03-summary.md
+
+      - type: reading
+        title: Question
+        path: sections/section-020/capstone/labs/lab-01/question.md
+      - type: lab
+        title: "Fleet Recovery"
+        path: sections/section-020/capstone/labs/lab-01
+        difficulty: intermediate
+        estimated_duration: 25m
+        topic: workloads
+        task_kind: troubleshooting
+        tags: [deployment, replicas, labels, kubectl-apply, pending, crashloopbackoff, events, kubectl-logs]
+        learning_goals:
+          - Scale a Deployment, add a pod label and write a Service for it
+          - Fix a Pending pod and a crash loop on the same planet
+        resources:
+          - name: "Debug pods"
+            url: https://kubernetes.io/docs/tasks/debug/debug-application/debug-pods/
+          - name: "Kubernetes Services"
+            url: https://kubernetes.io/docs/concepts/services-networking/service/
+      - type: quiz
+        title: "Knowledge Check: Change And Repair The Fleet"
+        path: sections/section-020/quiz.yaml
+        pass_score: 70
+      - type: quiz
+        title: "Final Knowledge Check: Getting Started"
+        path: sections/final-domain-quiz.yaml
+        pass_score: 70

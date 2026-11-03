@@ -1,0 +1,89 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+#
+# Rescue Two Stuck Ships. UNTESTED: built and statically checked only.
+# A troubleshooting lab: `hauler` is Pending (its memory request is far too
+# big) and `flicker` is in a crash loop (its command exits at once).
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-000-lab-020-02-01
+  docs:
+    examQuestion: question.md
+    guide: solution.md
+    prerequisites: docs/prerequisites.md
+    caseStudy: docs/case-study.md
+
+runtime:
+  type: kind
+  kind:
+    preloadImages:
+      - nginx:1.27-alpine
+
+bootstrap:
+  manifests:
+    - name: rescue-lab namespace with the broken hauler and flicker Deployments
+      type: folder
+      source: manifests/
+  waitFor:
+    - resource: nodes
+      all: true
+
+testing:
+  manifests:
+    - name: reference solution
+      type: folder
+      source: solution/
+  waitFor:
+    - resource: deploy/hauler
+      namespace: rescue-lab
+    - resource: deploy/flicker
+      namespace: rescue-lab
+
+validation:
+  checks:
+    - name: "hauler pod is ready"
+      type: jsonpath
+      resource: deploy/hauler -n rescue-lab
+      jsonpath: "{.status.readyReplicas}"
+      expect: "1"
+      points: 2
+      hint: "kubectl describe pod shows a FailedScheduling event. Lower the memory request of the hauler container, for example to 64Mi."
+    - name: "hauler still has 1 replica"
+      type: jsonpath
+      resource: deploy/hauler -n rescue-lab
+      jsonpath: "{.spec.replicas}"
+      expect: "1"
+      hint: "Fix the request instead of changing the number of replicas."
+    - name: "hauler still runs the image nginx:1.27-alpine"
+      type: jsonpath
+      resource: deploy/hauler -n rescue-lab
+      jsonpath: "{.spec.template.spec.containers[0].image}"
+      expect: "nginx:1.27-alpine"
+      hint: "Only the memory request needs to change."
+    - name: "flicker pod is ready"
+      type: jsonpath
+      resource: deploy/flicker -n rescue-lab
+      jsonpath: "{.status.readyReplicas}"
+      expect: "1"
+      points: 2
+      hint: "kubectl logs shows why the container stops. Look at the command of the container in the Deployment."
+    - name: "flicker still has 1 replica"
+      type: jsonpath
+      resource: deploy/flicker -n rescue-lab
+      jsonpath: "{.spec.replicas}"
+      expect: "1"
+      hint: "Fix the container instead of changing the number of replicas."
+    - name: "flicker still runs the image nginx:1.27-alpine"
+      type: jsonpath
+      resource: deploy/flicker -n rescue-lab
+      jsonpath: "{.spec.template.spec.containers[0].image}"
+      expect: "nginx:1.27-alpine"
+      hint: "Keep the image. Only the command is wrong."
+  scripts:
+    - name: flicker-runs-the-image-default
+      description: "flicker runs the normal nginx start command, with no command or args override"
+      type: file
+      source: validation/validate-flicker-default-command.sh
+      hint: "Remove the command (and any args) from the flicker container instead of replacing it with another command."
+
+teardown:
+  keepCluster: false

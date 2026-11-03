@@ -1,0 +1,18 @@
+# Starting state: the image name is misspelled ("ngnix").
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cargo
+  namespace: hangar
+spec:
+  replicas: 3
+  selector:
+    matchLabels: {app: cargo}
+  template:
+    metadata:
+      labels: {app: cargo}
+    spec:
+      containers:
+        - name: web
+          image: ngnix:1.27-alpine
+          ports: [{containerPort: 80}]

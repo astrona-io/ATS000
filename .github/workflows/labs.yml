@@ -32,17 +32,24 @@ jobs:
           chmod +x astrona
 
       - name: astrona validate
-        run: ./astrona validate -c sections/section-010/module-01/labs/lab-01
+        run: |
+          for dir in $(find sections -name config.yaml -exec dirname {} \;); do
+            ./astrona validate -c "$dir"
+          done
 
       - name: astrona test
-        run: ./astrona test -c sections/section-010/module-01/labs/lab-01 --junit-xml=junit-report.xml --diagnostics-dir=astrona-diagnostics
+        run: |
+          mkdir -p junit-reports
+          for dir in $(find sections -path "*/labs/*" -name config.yaml -exec dirname {} \; | sort); do
+            ./astrona test -c "$dir" --junit-xml="junit-reports/$(echo "$dir" | tr / -).xml" --diagnostics-dir=astrona-diagnostics
+          done
 
       - name: Upload JUnit report
         if: always()
         uses: actions/upload-artifact@v7
         with:
           name: junit-report
-          path: junit-report.xml
+          path: junit-reports/
 
       - name: Upload diagnostics
         if: failure()
