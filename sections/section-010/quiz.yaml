@@ -3,7 +3,7 @@ schema_version: 1
 kind: question_bank
 id: ats000-010
 course_id: ATS000
-status: draft
+status: alpha
 provenance: Original practice material written for this course.
 scope:
   type: section

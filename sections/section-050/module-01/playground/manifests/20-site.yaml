@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: site
+  namespace: config-lab
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: site
+  template:
+    metadata:
+      labels:
+        app: site
+    spec:
+      containers:
+        - name: web
+          image: nginx:1.27-alpine
+          ports:
+            - containerPort: 80
+          envFrom:
+            - configMapRef:
+                name: site-config
+          env:
+            - name: KEY
+              valueFrom:
+                secretKeyRef:
+                  name: site-secret
+                  key: key
+          volumeMounts:
+            - name: site-files
+              mountPath: /etc/site
+      volumes:
+        - name: site-files
+          configMap:
+            name: site-config

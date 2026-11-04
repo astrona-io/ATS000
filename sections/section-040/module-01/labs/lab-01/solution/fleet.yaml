@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: panel
+  namespace: console-lab
+  labels:
+    tier: ops
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: panel
+  template:
+    metadata:
+      labels:
+        app: panel
+    spec:
+      containers:
+        - name: web
+          image: nginx:1.27-alpine
+          ports:
+            - containerPort: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dial
+  namespace: console-lab
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dial
+  template:
+    metadata:
+      labels:
+        app: dial
+    spec:
+      containers:
+        - name: web
+          image: nginx:1.27-alpine
+          ports:
+            - containerPort: 80

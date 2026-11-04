@@ -1,0 +1,28 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+#
+# Find Your Way Around The Terminal (PLAYGROUND).
+# A clean sandbox with three Deployments on the planet `terminal-lab` to practise
+# reading and filtering output. No task, no grading.
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-000-playground-030-01
+  docs:
+    guide: docs/overview.md
+
+runtime:
+  type: kind
+  kind:
+    preloadImages:
+      - nginx:1.27-alpine
+
+bootstrap:
+  manifests:
+    - name: terminal-lab namespace with three small Deployments
+      type: folder
+      source: manifests/
+  waitFor:
+    - resource: nodes
+      all: true
+
+teardown:
+  keepCluster: false

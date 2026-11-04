@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hold
+  namespace: cargo-lab
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: hold
+  template:
+    metadata:
+      labels:
+        app: hold
+    spec:
+      containers:
+        - name: web
+          image: nginx:1.27-alpine
+          ports:
+            - containerPort: 80
+          env:
+            - name: RELEASE
+              value: steady
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lock
+  namespace: cargo-lab
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: lock
+  template:
+    metadata:
+      labels:
+        app: lock
+    spec:
+      containers:
+        - name: web
+          image: nginx:1.27-alpine
+          ports:
+            - containerPort: 80
+          env:
+            - name: PIN
+              valueFrom:
+                secretKeyRef:
+                  name: lock-key
+                  key: PIN
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: lock-key
+  namespace: cargo-lab
+type: Opaque
+stringData:
+  PIN: "4721"

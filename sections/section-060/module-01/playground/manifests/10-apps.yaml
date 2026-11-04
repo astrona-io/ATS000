@@ -1,0 +1,148 @@
+# Five faults, left on purpose. ok is healthy.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ok
+  namespace: clinic-lab
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ok
+  template:
+    metadata:
+      labels:
+        app: ok
+    spec:
+      containers:
+        - name: web
+          image: nginx:1.27-alpine
+          ports:
+            - containerPort: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wrong-tag
+  namespace: clinic-lab
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: wrong-tag
+  template:
+    metadata:
+      labels:
+        app: wrong-tag
+    spec:
+      containers:
+        - name: web
+          image: nginx:1.27-alpne
+          ports:
+            - containerPort: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: too-big
+  namespace: clinic-lab
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: too-big
+  template:
+    metadata:
+      labels:
+        app: too-big
+    spec:
+      containers:
+        - name: web
+          image: nginx:1.27-alpine
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              memory: 512Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: quitter
+  namespace: clinic-lab
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: quitter
+  template:
+    metadata:
+      labels:
+        app: quitter
+    spec:
+      containers:
+        - name: web
+          image: nginx:1.27-alpine
+          command: ["sh", "-c", "echo 'engine is cold' >&2; exit 1"]
+          ports:
+            - containerPort: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: needs-config
+  namespace: clinic-lab
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: needs-config
+  template:
+    metadata:
+      labels:
+        app: needs-config
+    spec:
+      containers:
+        - name: web
+          image: nginx:1.27-alpine
+          ports:
+            - containerPort: 80
+          env:
+            - name: GREETING
+              valueFrom:
+                configMapKeyRef:
+                  name: missing-config
+                  key: GREETING
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lonely
+  namespace: clinic-lab
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: lonely
+  template:
+    metadata:
+      labels:
+        app: lonely
+    spec:
+      containers:
+        - name: web
+          image: nginx:1.27-alpine
+          ports:
+            - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: lonely
+  namespace: clinic-lab
+spec:
+  selector:
+    app: lone
+  ports:
+    - port: 80
+      targetPort: 80

@@ -1,0 +1,85 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+#
+# Capstone: Cargo Hold Recovery. UNTESTED: built and statically checked only.
+# A capstone: roll back `hold`, which has a stuck second revision, and create the
+# Secret that `lock` needs.
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-000-capstone-050
+  docs:
+    examQuestion: question.md
+    guide: solution.md
+    prerequisites: docs/prerequisites.md
+    caseStudy: docs/case-study.md
+
+runtime:
+  type: kind
+  kind:
+    preloadImages:
+      - nginx:1.27-alpine
+
+bootstrap:
+  init:
+    - name: seed-cargo
+      description: Apply hold release one and lock, then apply hold release two which cannot start
+      type: file
+      source: bootstrap/setup.sh
+  waitFor:
+    - resource: nodes
+      all: true
+
+testing:
+  manifests:
+    - name: reference solution
+      type: folder
+      source: solution/
+  waitFor:
+    - resource: deploy/hold
+      namespace: cargo-lab
+    - resource: deploy/lock
+      namespace: cargo-lab
+
+validation:
+  checks:
+    - name: "hold runs the image nginx:1.27-alpine"
+      type: jsonpath
+      resource: deploy/hold -n cargo-lab
+      jsonpath: "{.spec.template.spec.containers[0].image}"
+      expect: "nginx:1.27-alpine"
+      hint: "The newest revision of hold has a misspelled image. Roll back."
+    - name: "hold has RELEASE=steady"
+      type: jsonpath
+      resource: deploy/hold -n cargo-lab
+      jsonpath: "{.spec.template.spec.containers[0].env[?(@.name=='RELEASE')].value}"
+      expect: "steady"
+      hint: "Rolling back also returns the old value. Fixing only the image does not."
+    - name: "hold has 2 updated pods"
+      type: jsonpath
+      resource: deploy/hold -n cargo-lab
+      jsonpath: "{.status.updatedReplicas}"
+      expect: "2"
+      points: 2
+      hint: "Wait for the rollout to finish."
+    - name: "hold has 2 ready pods"
+      type: jsonpath
+      resource: deploy/hold -n cargo-lab
+      jsonpath: "{.status.readyReplicas}"
+      expect: "2"
+      points: 2
+      hint: "kubectl rollout status deployment/hold -n cargo-lab shows the progress."
+    - name: "lock-key holds PIN=4721"
+      type: jsonpath
+      resource: secret/lock-key -n cargo-lab
+      jsonpath: "{.data.PIN}"
+      expect: "NDcyMQ=="
+      hint: "Create the Secret lock-key with the key PIN and the value 4721."
+    - name: "lock has 1 ready pod"
+      type: jsonpath
+      resource: deploy/lock -n cargo-lab
+      jsonpath: "{.status.readyReplicas}"
+      expect: "1"
+      points: 2
+      hint: "kubectl describe pod shows which object is missing. Create it; do not edit the Deployment."
+
+teardown:
+  keepCluster: false

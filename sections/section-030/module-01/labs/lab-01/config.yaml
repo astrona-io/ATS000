@@ -1,0 +1,77 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+#
+# Find The Silent Ships. UNTESTED: built and statically checked only.
+# A troubleshooting lab: `south` has no ships (replicas 0) and `east` has a misspelled image tag.
+# The student finds both with a roll call and a pipe.
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-000-lab-030-01-01
+  docs:
+    examQuestion: question.md
+    guide: solution.md
+    prerequisites: docs/prerequisites.md
+    caseStudy: docs/case-study.md
+
+runtime:
+  type: kind
+  kind:
+    preloadImages:
+      - nginx:1.27-alpine
+
+bootstrap:
+  manifests:
+    - name: shell-lab namespace with the north, south and east Deployments
+      type: folder
+      source: manifests/
+  waitFor:
+    - resource: nodes
+      all: true
+
+testing:
+  manifests:
+    - name: reference solution
+      type: folder
+      source: solution/
+  waitFor:
+    - resource: deploy/south
+      namespace: shell-lab
+    - resource: deploy/east
+      namespace: shell-lab
+
+validation:
+  checks:
+    - name: "south asks for 2 replicas"
+      type: jsonpath
+      resource: deploy/south -n shell-lab
+      jsonpath: "{.spec.replicas}"
+      expect: "2"
+      hint: "The Deployment south asks for no ships. Scale it to 2 with kubectl scale."
+    - name: "south has 2 ready pods"
+      type: jsonpath
+      resource: deploy/south -n shell-lab
+      jsonpath: "{.status.readyReplicas}"
+      expect: "2"
+      points: 2
+      hint: "After scaling, wait a few seconds and check the READY column again."
+    - name: "east runs the image nginx:1.27-alpine"
+      type: jsonpath
+      resource: deploy/east -n shell-lab
+      jsonpath: "{.spec.template.spec.containers[0].image}"
+      expect: "nginx:1.27-alpine"
+      hint: "The tag of east is misspelled. kubectl describe pod shows the pull error in the Events."
+    - name: "east has 2 ready pods"
+      type: jsonpath
+      resource: deploy/east -n shell-lab
+      jsonpath: "{.status.readyReplicas}"
+      expect: "2"
+      points: 2
+      hint: "Fix the image of the Deployment, not of a pod. Then wait for the new pods."
+    - name: "north still has 2 replicas"
+      type: jsonpath
+      resource: deploy/north -n shell-lab
+      jsonpath: "{.spec.replicas}"
+      expect: "2"
+      hint: "north was healthy. Leave it alone."
+
+teardown:
+  keepCluster: false

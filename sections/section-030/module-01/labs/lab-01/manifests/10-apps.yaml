@@ -1,0 +1,64 @@
+# north is healthy. south is asked to run no ships at all (replicas: 0).
+# east has a misspelled image tag. Both are left broken on purpose.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: north
+  namespace: shell-lab
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: north
+  template:
+    metadata:
+      labels:
+        app: north
+    spec:
+      containers:
+        - name: web
+          image: nginx:1.27-alpine
+          ports:
+            - containerPort: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: south
+  namespace: shell-lab
+spec:
+  replicas: 0
+  selector:
+    matchLabels:
+      app: south
+  template:
+    metadata:
+      labels:
+        app: south
+    spec:
+      containers:
+        - name: web
+          image: nginx:1.27-alpine
+          ports:
+            - containerPort: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: east
+  namespace: shell-lab
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: east
+  template:
+    metadata:
+      labels:
+        app: east
+    spec:
+      containers:
+        - name: web
+          image: nginx:1.27-alpne
+          ports:
+            - containerPort: 80

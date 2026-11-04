@@ -1,0 +1,70 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+#
+# Write A Note Inside A Ship. UNTESTED: built and statically checked only.
+# Practises namespaces and kubectl exec: write a file inside the running `hatch` pod
+# and scale `drone`, which lives in another namespace. One script checks the file.
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-000-lab-040-02-01
+  docs:
+    examQuestion: question.md
+    guide: solution.md
+    prerequisites: docs/prerequisites.md
+    caseStudy: docs/case-study.md
+
+runtime:
+  type: kind
+  kind:
+    preloadImages:
+      - nginx:1.27-alpine
+
+bootstrap:
+  manifests:
+    - name: bay-lab and outpost namespaces with hatch and drone
+      type: folder
+      source: manifests/
+  waitFor:
+    - resource: nodes
+      all: true
+
+testing:
+  manifests:
+    - name: reference solution
+      type: folder
+      source: solution/
+  waitFor:
+    - resource: deploy/drone
+      namespace: outpost
+    - resource: deploy/hatch
+      namespace: bay-lab
+
+validation:
+  checks:
+    - name: "drone asks for 2 replicas"
+      type: jsonpath
+      resource: deploy/drone -n outpost
+      jsonpath: "{.spec.replicas}"
+      expect: "2"
+      hint: "drone does not live in bay-lab. Find its namespace with kubectl get deployments -A, then use -n outpost."
+    - name: "drone has 2 ready pods"
+      type: jsonpath
+      resource: deploy/drone -n outpost
+      jsonpath: "{.status.readyReplicas}"
+      expect: "2"
+      points: 2
+      hint: "Wait for the new pod to become ready."
+    - name: "hatch still has 1 replica"
+      type: jsonpath
+      resource: deploy/hatch -n bay-lab
+      jsonpath: "{.spec.replicas}"
+      expect: "1"
+      hint: "Leave the number of ships of hatch alone."
+  scripts:
+    - name: hatch-status-file
+      description: "The hatch pod serves a file status.txt that says docked"
+      type: file
+      source: validation/validate-hatch-status.sh
+      hint: "Run a shell inside a hatch pod with kubectl exec and write docked into /usr/share/nginx/html/status.txt."
+
+teardown:
+  keepCluster: false

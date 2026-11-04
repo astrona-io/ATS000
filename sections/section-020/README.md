@@ -12,7 +12,7 @@ This section has two modules and a capstone. Each module has its own playground 
 | [Find Why Ships Will Not Fly](./module-02/course.md) | `Pending`, resource requests, `CrashLoopBackOff`, `kubectl logs`, `kubectl edit` | `ats-000-playground-020-02`: the planet `rescue-lab` with a Pending `hauler` and a crashing `flicker` | [Rescue Two Stuck Ships](./module-02/labs/lab-01/README.md) |
 | Capstone | Scale, label, give a Service and rescue two stuck ships on one planet | none | [Fleet Recovery](./capstone/labs/lab-01/README.md) |
 
-The section ends with a [knowledge check](./quiz.yaml). The [final quiz](../final-domain-quiz.yaml) covers both sections.
+The section ends with a [knowledge check](./quiz.yaml). The [final quiz](../final-domain-quiz.yaml) covers all sections.
 
 ## What you need
 

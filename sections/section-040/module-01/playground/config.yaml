@@ -1,0 +1,28 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+#
+# The Astrona Workflow (PLAYGROUND).
+# A clean sandbox with one healthy and one broken Deployment on the planet
+# `training-lab`, to practise astrona commands. No task, no grading.
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-000-playground-040-01
+  docs:
+    guide: docs/overview.md
+
+runtime:
+  type: kind
+  kind:
+    preloadImages:
+      - nginx:1.27-alpine
+
+bootstrap:
+  manifests:
+    - name: training-lab namespace with probe and drift
+      type: folder
+      source: manifests/
+  waitFor:
+    - resource: nodes
+      all: true
+
+teardown:
+  keepCluster: false

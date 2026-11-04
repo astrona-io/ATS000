@@ -1,0 +1,86 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+#
+# Capstone: Mission Control Sweep. UNTESTED: built and statically checked only.
+# A capstone: three planets, three different faults. A Deployment must be scaled, one
+# crashes until an environment variable is set (the log says which), and one is Pending.
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-000-capstone-040
+  docs:
+    examQuestion: question.md
+    guide: solution.md
+    prerequisites: docs/prerequisites.md
+    caseStudy: docs/case-study.md
+
+runtime:
+  type: kind
+  kind:
+    preloadImages:
+      - nginx:1.27-alpine
+
+bootstrap:
+  manifests:
+    - name: deck-a, deck-b and deck-c namespaces with relay-a, relay-b and relay-c
+      type: folder
+      source: manifests/
+  waitFor:
+    - resource: nodes
+      all: true
+
+testing:
+  manifests:
+    - name: reference solution
+      type: folder
+      source: solution/
+  waitFor:
+    - resource: deploy/relay-a
+      namespace: deck-a
+    - resource: deploy/relay-b
+      namespace: deck-b
+    - resource: deploy/relay-c
+      namespace: deck-c
+
+validation:
+  checks:
+    - name: "relay-a asks for 3 replicas"
+      type: jsonpath
+      resource: deploy/relay-a -n deck-a
+      jsonpath: "{.spec.replicas}"
+      expect: "3"
+      hint: "Scale relay-a to 3 with kubectl scale."
+    - name: "relay-a has 3 ready pods"
+      type: jsonpath
+      resource: deploy/relay-a -n deck-a
+      jsonpath: "{.status.readyReplicas}"
+      expect: "3"
+      points: 2
+      hint: "Wait for the new pods to become ready."
+    - name: "relay-b sets MODE to on"
+      type: jsonpath
+      resource: deploy/relay-b -n deck-b
+      jsonpath: "{.spec.template.spec.containers[0].env[?(@.name=='MODE')].value}"
+      expect: "on"
+      hint: "kubectl logs on the relay-b pod says what is missing. Set that variable with kubectl set env."
+    - name: "relay-b has 1 ready pod"
+      type: jsonpath
+      resource: deploy/relay-b -n deck-b
+      jsonpath: "{.status.readyReplicas}"
+      expect: "1"
+      points: 2
+      hint: "After the variable is set, the Deployment builds a new pod. Wait for it."
+    - name: "relay-c has 1 ready pod"
+      type: jsonpath
+      resource: deploy/relay-c -n deck-c
+      jsonpath: "{.status.readyReplicas}"
+      expect: "1"
+      points: 2
+      hint: "kubectl describe pod shows a FailedScheduling event. Lower the memory request."
+    - name: "relay-c still runs the image nginx:1.27-alpine"
+      type: jsonpath
+      resource: deploy/relay-c -n deck-c
+      jsonpath: "{.spec.template.spec.containers[0].image}"
+      expect: "nginx:1.27-alpine"
+      hint: "Only the memory request needs to change."
+
+teardown:
+  keepCluster: false

@@ -1,0 +1,68 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+#
+# Give The Gate Its Settings. UNTESTED: built and statically checked only.
+# `gate` reads one value from a ConfigMap and one from a Secret, and neither exists
+# yet, so its pod cannot start. The student creates both.
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-000-lab-050-01-01
+  docs:
+    examQuestion: question.md
+    guide: solution.md
+    prerequisites: docs/prerequisites.md
+    caseStudy: docs/case-study.md
+
+runtime:
+  type: kind
+  kind:
+    preloadImages:
+      - nginx:1.27-alpine
+
+bootstrap:
+  manifests:
+    - name: vault-lab namespace with the gate Deployment
+      type: folder
+      source: manifests/
+  waitFor:
+    - resource: nodes
+      all: true
+
+testing:
+  manifests:
+    - name: reference solution
+      type: folder
+      source: solution/
+  waitFor:
+    - resource: deploy/gate
+      namespace: vault-lab
+
+validation:
+  checks:
+    - name: "gate-config holds GREETING=welcome"
+      type: jsonpath
+      resource: configmap/gate-config -n vault-lab
+      jsonpath: "{.data.GREETING}"
+      expect: "welcome"
+      hint: "Create the ConfigMap gate-config with the key GREETING and the value welcome."
+    - name: "gate-secret holds TOKEN=orbit-77"
+      type: jsonpath
+      resource: secret/gate-secret -n vault-lab
+      jsonpath: "{.data.TOKEN}"
+      expect: "b3JiaXQtNzc="
+      hint: "Create the Secret gate-secret with the key TOKEN and the value orbit-77. The grader reads the stored base64 form."
+    - name: "gate has 1 ready pod"
+      type: jsonpath
+      resource: deploy/gate -n vault-lab
+      jsonpath: "{.status.readyReplicas}"
+      expect: "1"
+      points: 2
+      hint: "kubectl describe pod shows CreateContainerConfigError and which object is missing. Create the missing objects; do not edit the Deployment."
+    - name: "gate still reads GREETING from gate-config"
+      type: jsonpath
+      resource: deploy/gate -n vault-lab
+      jsonpath: "{.spec.template.spec.containers[0].env[?(@.name=='GREETING')].valueFrom.configMapKeyRef.name}"
+      expect: "gate-config"
+      hint: "Keep the Deployment as it is. Create the objects it names."
+
+teardown:
+  keepCluster: false

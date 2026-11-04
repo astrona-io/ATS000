@@ -1,0 +1,21 @@
+# lamp has a misspelled image tag and asks for one ship instead of two.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lamp
+  namespace: deck-lab
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: lamp
+  template:
+    metadata:
+      labels:
+        app: lamp
+    spec:
+      containers:
+        - name: web
+          image: nginx:1.27-alpne
+          ports:
+            - containerPort: 80

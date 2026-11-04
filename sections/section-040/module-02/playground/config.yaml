@@ -1,0 +1,28 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+#
+# The kubectl Toolkit (PLAYGROUND).
+# A clean sandbox with two namespaces: a healthy Deployment with a Service, a
+# second namespace, and a crashing Deployment with a log message. No task, no grading.
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-000-playground-040-02
+  docs:
+    guide: docs/overview.md
+
+runtime:
+  type: kind
+  kind:
+    preloadImages:
+      - nginx:1.27-alpine
+
+bootstrap:
+  manifests:
+    - name: harbor namespaces with beacon, buoy and stutter
+      type: folder
+      source: manifests/
+  waitFor:
+    - resource: nodes
+      all: true
+
+teardown:
+  keepCluster: false

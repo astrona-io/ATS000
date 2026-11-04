@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: probe
+  namespace: training-lab
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: probe
+  template:
+    metadata:
+      labels:
+        app: probe
+    spec:
+      containers:
+        - name: web
+          image: nginx:1.27-alpine
+          ports:
+            - containerPort: 80
+---
+# drift has a misspelled image tag, on purpose.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: drift
+  namespace: training-lab
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: drift
+  template:
+    metadata:
+      labels:
+        app: drift
+    spec:
+      containers:
+        - name: web
+          image: nginx:1.27-alpne
+          ports:
+            - containerPort: 80

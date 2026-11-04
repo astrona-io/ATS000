@@ -1,0 +1,70 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+#
+# Undo The Bad Release. UNTESTED: built and statically checked only.
+# `engine` was updated to a release that cannot start. Roll back to the previous
+# revision. Fixing only the image would leave the new RELEASE value in place.
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-000-lab-050-02-01
+  docs:
+    examQuestion: question.md
+    guide: solution.md
+    prerequisites: docs/prerequisites.md
+    caseStudy: docs/case-study.md
+
+runtime:
+  type: kind
+  kind:
+    preloadImages:
+      - nginx:1.27-alpine
+
+bootstrap:
+  init:
+    - name: seed-releases
+      description: Apply release one, wait for it, then apply release two which cannot start
+      type: file
+      source: bootstrap/setup.sh
+  waitFor:
+    - resource: nodes
+      all: true
+
+testing:
+  manifests:
+    - name: reference solution
+      type: folder
+      source: solution/
+  waitFor:
+    - resource: deploy/engine
+      namespace: release-lab
+
+validation:
+  checks:
+    - name: "engine runs the image nginx:1.27-alpine"
+      type: jsonpath
+      resource: deploy/engine -n release-lab
+      jsonpath: "{.spec.template.spec.containers[0].image}"
+      expect: "nginx:1.27-alpine"
+      hint: "The newest revision has a misspelled image. kubectl rollout history shows the revisions."
+    - name: "engine has RELEASE=stable"
+      type: jsonpath
+      resource: deploy/engine -n release-lab
+      jsonpath: "{.spec.template.spec.containers[0].env[?(@.name=='RELEASE')].value}"
+      expect: "stable"
+      hint: "Revision 2 also changed RELEASE. Going back to revision 1 brings the old value back; fixing only the image does not."
+    - name: "both pods use the current template"
+      type: jsonpath
+      resource: deploy/engine -n release-lab
+      jsonpath: "{.status.updatedReplicas}"
+      expect: "2"
+      points: 2
+      hint: "After a good rollout, both pods come from the newest template."
+    - name: "engine has 2 ready pods"
+      type: jsonpath
+      resource: deploy/engine -n release-lab
+      jsonpath: "{.status.readyReplicas}"
+      expect: "2"
+      points: 2
+      hint: "Check kubectl rollout status deployment/engine -n release-lab."
+
+teardown:
+  keepCluster: false

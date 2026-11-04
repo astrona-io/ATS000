@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: beacon
+  namespace: harbor
+  labels:
+    tier: front
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: beacon
+  template:
+    metadata:
+      labels:
+        app: beacon
+    spec:
+      containers:
+        - name: web
+          image: nginx:1.27-alpine
+          ports:
+            - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: beacon
+  namespace: harbor
+spec:
+  selector:
+    app: beacon
+  ports:
+    - port: 80
+      targetPort: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: buoy
+  namespace: harbor-b
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: buoy
+  template:
+    metadata:
+      labels:
+        app: buoy
+    spec:
+      containers:
+        - name: web
+          image: nginx:1.27-alpine
+          ports:
+            - containerPort: 80
+---
+# stutter prints a message and exits at once, on purpose.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: stutter
+  namespace: harbor
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: stutter
+  template:
+    metadata:
+      labels:
+        app: stutter
+    spec:
+      containers:
+        - name: web
+          image: nginx:1.27-alpine
+          command: ["sh", "-c", "echo 'engine is cold' >&2; exit 1"]
+          ports:
+            - containerPort: 80

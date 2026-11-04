@@ -1,0 +1,86 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+#
+# Write The Radar Fleet Order. UNTESTED: built and statically checked only.
+# A build lab: the planet `yaml-lab` is empty. The student writes the Deployment `radar`
+# in a YAML file and applies it.
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-000-lab-030-02-01
+  docs:
+    examQuestion: question.md
+    guide: solution.md
+    prerequisites: docs/prerequisites.md
+    caseStudy: docs/case-study.md
+
+runtime:
+  type: kind
+  kind:
+    preloadImages:
+      - nginx:1.27-alpine
+
+bootstrap:
+  manifests:
+    - name: empty yaml-lab namespace
+      type: folder
+      source: manifests/
+  waitFor:
+    - resource: nodes
+      all: true
+
+testing:
+  manifests:
+    - name: reference solution
+      type: folder
+      source: solution/
+  waitFor:
+    - resource: deploy/radar
+      namespace: yaml-lab
+
+validation:
+  checks:
+    - name: "radar has 2 ready pods"
+      type: jsonpath
+      resource: deploy/radar -n yaml-lab
+      jsonpath: "{.status.readyReplicas}"
+      expect: "2"
+      points: 2
+      hint: "Check the file with kubectl apply --dry-run=client -f radar.yaml, apply it, then watch kubectl get pods -n yaml-lab."
+    - name: "radar asks for 2 replicas"
+      type: jsonpath
+      resource: deploy/radar -n yaml-lab
+      jsonpath: "{.spec.replicas}"
+      expect: "2"
+      hint: "Set spec.replicas to 2."
+    - name: "the pod label app is radar"
+      type: jsonpath
+      resource: deploy/radar -n yaml-lab
+      jsonpath: "{.spec.template.metadata.labels.app}"
+      expect: "radar"
+      hint: "The pod template needs the label app: radar, and the selector must match it."
+    - name: "the container is named scanner"
+      type: jsonpath
+      resource: deploy/radar -n yaml-lab
+      jsonpath: "{.spec.template.spec.containers[0].name}"
+      expect: "scanner"
+      hint: "The container name is the - name: line under containers."
+    - name: "the container runs nginx:1.27-alpine"
+      type: jsonpath
+      resource: deploy/radar -n yaml-lab
+      jsonpath: "{.spec.template.spec.containers[0].image}"
+      expect: "nginx:1.27-alpine"
+      hint: "Use the image nginx:1.27-alpine exactly."
+    - name: "the container port is 80"
+      type: jsonpath
+      resource: deploy/radar -n yaml-lab
+      jsonpath: "{.spec.template.spec.containers[0].ports[0].containerPort}"
+      expect: "80"
+      hint: "Add ports with containerPort: 80 under the container."
+    - name: "the variable MODE is scan"
+      type: jsonpath
+      resource: deploy/radar -n yaml-lab
+      jsonpath: "{.spec.template.spec.containers[0].env[?(@.name=='MODE')].value}"
+      expect: "scan"
+      hint: "Add an env list with name: MODE and value: scan. Quote the value if you are unsure."
+
+teardown:
+  keepCluster: false

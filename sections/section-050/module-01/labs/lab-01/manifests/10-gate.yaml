@@ -1,0 +1,32 @@
+# gate refers to the ConfigMap gate-config and the Secret gate-secret. Neither exists yet.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gate
+  namespace: vault-lab
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gate
+  template:
+    metadata:
+      labels:
+        app: gate
+    spec:
+      containers:
+        - name: web
+          image: nginx:1.27-alpine
+          ports:
+            - containerPort: 80
+          env:
+            - name: GREETING
+              valueFrom:
+                configMapKeyRef:
+                  name: gate-config
+                  key: GREETING
+            - name: TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: gate-secret
+                  key: TOKEN

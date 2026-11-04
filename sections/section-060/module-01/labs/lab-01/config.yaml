@@ -1,0 +1,68 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+#
+# The Beacon That Reaches No One. UNTESTED: built and statically checked only.
+# The Deployment `frontend` is healthy, but its Service `front` has the wrong selector
+# and the wrong target port, so the Service reaches no pod.
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-000-lab-060-01-01
+  docs:
+    examQuestion: question.md
+    guide: solution.md
+    prerequisites: docs/prerequisites.md
+    caseStudy: docs/case-study.md
+
+runtime:
+  type: kind
+  kind:
+    preloadImages:
+      - nginx:1.27-alpine
+
+bootstrap:
+  manifests:
+    - name: mixed-lab namespace with the frontend Deployment and the front Service
+      type: folder
+      source: manifests/
+  waitFor:
+    - resource: nodes
+      all: true
+
+testing:
+  manifests:
+    - name: reference solution
+      type: folder
+      source: solution/
+  waitFor:
+    - resource: deploy/frontend
+      namespace: mixed-lab
+
+validation:
+  checks:
+    - name: "the Service front selects app=frontend"
+      type: jsonpath
+      resource: svc/front -n mixed-lab
+      jsonpath: "{.spec.selector.app}"
+      expect: "frontend"
+      hint: "kubectl get endpoints front shows no address. Compare the Service selector with the labels of the pods (kubectl get pods --show-labels)."
+    - name: "the Service front sends to port 80"
+      type: jsonpath
+      resource: svc/front -n mixed-lab
+      jsonpath: "{.spec.ports[0].targetPort}"
+      expect: "80"
+      points: 2
+      hint: "The container listens on port 80. Check the targetPort of the Service."
+    - name: "the Service front still listens on port 80"
+      type: jsonpath
+      resource: svc/front -n mixed-lab
+      jsonpath: "{.spec.ports[0].port}"
+      expect: "80"
+      hint: "Do not change the port of the Service."
+    - name: "frontend still has 2 ready pods"
+      type: jsonpath
+      resource: deploy/frontend -n mixed-lab
+      jsonpath: "{.status.readyReplicas}"
+      expect: "2"
+      hint: "The Deployment is healthy. Leave it alone."
+
+teardown:
+  keepCluster: false

@@ -1,0 +1,24 @@
+# Release two: a misspelled image tag and a new RELEASE value.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: engine
+  namespace: release-lab
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: engine
+  template:
+    metadata:
+      labels:
+        app: engine
+    spec:
+      containers:
+        - name: web
+          image: nginx:1.27-alpne
+          ports:
+            - containerPort: 80
+          env:
+            - name: RELEASE
+              value: canary

@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: radar
+  namespace: yaml-lab
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: radar
+  template:
+    metadata:
+      labels:
+        app: radar
+    spec:
+      containers:
+        - name: scanner
+          image: nginx:1.27-alpine
+          ports:
+            - containerPort: 80
+          env:
+            - name: MODE
+              value: scan

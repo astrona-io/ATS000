@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lamp
+  namespace: deck-lab
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: lamp
+  template:
+    metadata:
+      labels:
+        app: lamp
+    spec:
+      containers:
+        - name: web
+          image: nginx:1.27-alpine
+          ports:
+            - containerPort: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gauge
+  namespace: deck-lab
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: gauge
+  template:
+    metadata:
+      labels:
+        app: gauge
+        tier: ops
+    spec:
+      containers:
+        - name: web
+          image: nginx:1.27-alpine
+          ports:
+            - containerPort: 80
+          env:
+            - name: UNIT
+              value: metric

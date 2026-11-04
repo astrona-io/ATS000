@@ -1,0 +1,83 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+#
+# Capstone: The Deck Check. UNTESTED: built and statically checked only.
+# A capstone: fix the Deployment `lamp` found with a pipe, and write the new
+# Deployment `gauge` in a file.
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-000-capstone-030
+  docs:
+    examQuestion: question.md
+    guide: solution.md
+    prerequisites: docs/prerequisites.md
+    caseStudy: docs/case-study.md
+
+runtime:
+  type: kind
+  kind:
+    preloadImages:
+      - nginx:1.27-alpine
+
+bootstrap:
+  manifests:
+    - name: deck-lab namespace with the lamp Deployment
+      type: folder
+      source: manifests/
+  waitFor:
+    - resource: nodes
+      all: true
+
+testing:
+  manifests:
+    - name: reference solution
+      type: folder
+      source: solution/
+  waitFor:
+    - resource: deploy/lamp
+      namespace: deck-lab
+    - resource: deploy/gauge
+      namespace: deck-lab
+
+validation:
+  checks:
+    - name: "lamp runs the image nginx:1.27-alpine"
+      type: jsonpath
+      resource: deploy/lamp -n deck-lab
+      jsonpath: "{.spec.template.spec.containers[0].image}"
+      expect: "nginx:1.27-alpine"
+      hint: "kubectl describe pod shows the pull error. Fix the tag with kubectl set image."
+    - name: "lamp asks for 2 replicas"
+      type: jsonpath
+      resource: deploy/lamp -n deck-lab
+      jsonpath: "{.spec.replicas}"
+      expect: "2"
+      hint: "Scale lamp to 2 with kubectl scale."
+    - name: "lamp has 2 ready pods"
+      type: jsonpath
+      resource: deploy/lamp -n deck-lab
+      jsonpath: "{.status.readyReplicas}"
+      expect: "2"
+      points: 2
+      hint: "Wait for the new pods to become ready."
+    - name: "gauge has 2 ready pods"
+      type: jsonpath
+      resource: deploy/gauge -n deck-lab
+      jsonpath: "{.status.readyReplicas}"
+      expect: "2"
+      points: 2
+      hint: "Write gauge.yaml, check it with a dry run, and apply it."
+    - name: "the gauge pods have the label tier=ops"
+      type: jsonpath
+      resource: deploy/gauge -n deck-lab
+      jsonpath: "{.spec.template.metadata.labels.tier}"
+      expect: "ops"
+      hint: "Add tier: ops under spec.template.metadata.labels, next to app: gauge."
+    - name: "the variable UNIT is metric"
+      type: jsonpath
+      resource: deploy/gauge -n deck-lab
+      jsonpath: "{.spec.template.spec.containers[0].env[?(@.name=='UNIT')].value}"
+      expect: "metric"
+      hint: "Add an env list with name: UNIT and value: metric."
+
+teardown:
+  keepCluster: false

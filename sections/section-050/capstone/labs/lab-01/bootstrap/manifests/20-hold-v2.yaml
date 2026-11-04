@@ -1,0 +1,24 @@
+# Release two of hold: a misspelled image tag and a new RELEASE value.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hold
+  namespace: cargo-lab
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: hold
+  template:
+    metadata:
+      labels:
+        app: hold
+    spec:
+      containers:
+        - name: web
+          image: nginx:1.27-alpne
+          ports:
+            - containerPort: 80
+          env:
+            - name: RELEASE
+              value: rushed

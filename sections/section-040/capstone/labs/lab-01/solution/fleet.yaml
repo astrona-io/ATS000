@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: relay-a
+  namespace: deck-a
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: relay-a
+  template:
+    metadata:
+      labels:
+        app: relay-a
+    spec:
+      containers:
+        - name: web
+          image: nginx:1.27-alpine
+          ports:
+            - containerPort: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: relay-b
+  namespace: deck-b
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: relay-b
+  template:
+    metadata:
+      labels:
+        app: relay-b
+    spec:
+      containers:
+        - name: web
+          image: nginx:1.27-alpine
+          command: ["sh", "-c", "if [ \"$MODE\" != on ]; then echo 'MODE is not set to on' >&2; exit 1; fi; exec nginx -g 'daemon off;'"]
+          ports:
+            - containerPort: 80
+          env:
+            - name: MODE
+              value: "on"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: relay-c
+  namespace: deck-c
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: relay-c
+  template:
+    metadata:
+      labels:
+        app: relay-c
+    spec:
+      containers:
+        - name: web
+          image: nginx:1.27-alpine
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              memory: 64Mi

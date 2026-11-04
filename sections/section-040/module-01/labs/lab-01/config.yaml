@@ -1,0 +1,77 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+#
+# Read The Examiner's Hints. UNTESTED: built and statically checked only.
+# A lab built to be submitted more than once: the starting state fails several checks,
+# and each hint points at one fix.
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-000-lab-040-01-01
+  docs:
+    examQuestion: question.md
+    guide: solution.md
+    prerequisites: docs/prerequisites.md
+    caseStudy: docs/case-study.md
+
+runtime:
+  type: kind
+  kind:
+    preloadImages:
+      - nginx:1.27-alpine
+
+bootstrap:
+  manifests:
+    - name: console-lab namespace with panel and dial
+      type: folder
+      source: manifests/
+  waitFor:
+    - resource: nodes
+      all: true
+
+testing:
+  manifests:
+    - name: reference solution
+      type: folder
+      source: solution/
+  waitFor:
+    - resource: deploy/panel
+      namespace: console-lab
+    - resource: deploy/dial
+      namespace: console-lab
+
+validation:
+  checks:
+    - name: "panel asks for 3 replicas"
+      type: jsonpath
+      resource: deploy/panel -n console-lab
+      jsonpath: "{.spec.replicas}"
+      expect: "3"
+      hint: "panel needs more ships. kubectl scale deployment/panel --replicas=3 -n console-lab."
+    - name: "panel has 3 ready pods"
+      type: jsonpath
+      resource: deploy/panel -n console-lab
+      jsonpath: "{.status.readyReplicas}"
+      expect: "3"
+      points: 2
+      hint: "Wait for the new pods. Check kubectl get pods -n console-lab."
+    - name: "the Deployment panel has the label tier=ops"
+      type: jsonpath
+      resource: deploy/panel -n console-lab
+      jsonpath: "{.metadata.labels.tier}"
+      expect: "ops"
+      hint: "kubectl label deployment/panel tier=ops -n console-lab."
+    - name: "dial runs the image nginx:1.27-alpine"
+      type: jsonpath
+      resource: deploy/dial -n console-lab
+      jsonpath: "{.spec.template.spec.containers[0].image}"
+      expect: "nginx:1.27-alpine"
+      hint: "The tag of dial is misspelled. kubectl describe pod shows the pull error."
+    - name: "dial has 1 ready pod"
+      type: jsonpath
+      resource: deploy/dial -n console-lab
+      jsonpath: "{.status.readyReplicas}"
+      expect: "1"
+      points: 2
+      hint: "Fix the image of the Deployment and wait for the new pod."
+
+teardown:
+  keepCluster: false

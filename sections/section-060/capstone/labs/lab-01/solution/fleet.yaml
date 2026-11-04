@@ -1,0 +1,102 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alpha
+  namespace: drill-lab
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: alpha
+  template:
+    metadata:
+      labels:
+        app: alpha
+    spec:
+      containers:
+        - name: web
+          image: nginx:1.27-alpine
+          ports:
+            - containerPort: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: beta
+  namespace: drill-lab
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: beta
+  template:
+    metadata:
+      labels:
+        app: beta
+    spec:
+      containers:
+        - name: web
+          image: nginx:1.27-alpine
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              memory: 64Mi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gamma
+  namespace: drill-lab
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gamma
+  template:
+    metadata:
+      labels:
+        app: gamma
+    spec:
+      containers:
+        - name: web
+          image: nginx:1.27-alpine
+          command: ["sh", "-c", "if [ \"$MODE\" != on ]; then echo 'MODE is not set to on' >&2; exit 1; fi; exec nginx -g 'daemon off;'"]
+          ports:
+            - containerPort: 80
+          env:
+            - name: MODE
+              value: "on"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: delta-web
+  namespace: drill-lab
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: delta-web
+  template:
+    metadata:
+      labels:
+        app: delta-web
+    spec:
+      containers:
+        - name: web
+          image: nginx:1.27-alpine
+          ports:
+            - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: delta
+  namespace: drill-lab
+spec:
+  selector:
+    app: delta-web
+  ports:
+    - port: 80
+      targetPort: 80

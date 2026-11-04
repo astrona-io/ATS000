@@ -158,7 +158,9 @@ section is only true for this one.
   loop every later lab uses: start the lab, look at the cluster, fix it,
   submit it for grading, and clean up. Section 020 then adds the first
   everyday moves: scale, label, write a Deployment and a Service in files,
-  and tell `Pending` and `CrashLoopBackOff` apart. ATS000 is the "Getting Started"
+  and tell `Pending` and `CrashLoopBackOff` apart. Sections 030 to 060 add
+  terminal and YAML basics, the full `astrona` workflow, the kubectl toolkit,
+  ConfigMaps and Secrets, rollouts and a troubleshooting method. ATS000 is the "Getting Started"
   course. It is **not** tied to a certification exam, a domain or a domain
   weight. It is the door into the exam-style courses (for example the Istio
   Certified Associate courses ATS014 and ATS015), which all use the same loop.
@@ -178,6 +180,10 @@ section is only true for this one.
   | --- | --- | --- |
   | 010 | Your First Lab | None (getting started: the Astrona lab loop, first `kubectl` steps) |
   | 020 | Change And Repair The Fleet | None (getting started: scale, labels, files, Services, `Pending` and crash loops) |
+  | 030 | Read The Terminal And YAML | None (getting started: shell basics, pipes, YAML, dry run) |
+  | 040 | The Astrona CLI And The kubectl Toolkit | None (getting started: the full `astrona` loop, `-n`, `-A`, `-o`, `describe`, `logs`, `exec`, `port-forward`) |
+  | 050 | ConfigMaps, Secrets And Rollouts | None (getting started: settings, base64, `rollout undo`) |
+  | 060 | A Troubleshooting Method | None (getting started: four-step method, pod status table, Services and endpoints) |
 
   Every module has a playground, every section has a capstone lab and a
   `quiz.yaml`, and `sections/final-domain-quiz.yaml` covers the whole course.
@@ -278,6 +284,17 @@ The other modules and labs use their own planets. Use these names exactly:
 | Lab `ats-000-lab-020-01-01` | `launch-lab`: empty; the student builds Deployment and Service `relay` (3 replicas, labels `app=relay`, `tier=front`) |
 | Playground `ats-000-playground-020-02` and lab `ats-000-lab-020-02-01` | `rescue-lab`: `hauler` (request `512Gi` memory, Pending) and `flicker` (`command` exits, crash loop) |
 | Capstone 020 (`ats-000-capstone-020`) | `orbit-lab`: `crew` (1 replica, no `tier` label, no Service), `hauler`, `flicker` |
+| Playground `ats-000-playground-030-01` and lab `ats-000-lab-030-01-01` | `terminal-lab` (playground) and `shell-lab` (lab): Deployments with ready and not-ready ships for a pipe exercise |
+| Playground `ats-000-playground-030-02` and lab `ats-000-lab-030-02-01` | `draft-lab` (healthy `sample`) and `yaml-lab` (empty; the student writes the Deployment `radar`) |
+| Capstone 030 (`ats-000-capstone-030`) | `deck-lab` |
+| Playground `ats-000-playground-040-01` and lab `ats-000-lab-040-01-01` | `training-lab` (`probe`, `drift`) and `console-lab` (`panel`, `dial`) |
+| Playground `ats-000-playground-040-02` and lab `ats-000-lab-040-02-01` | `harbor`, `harbor-b` (playground) and `bay-lab`, `outpost` (lab: `hatch`, `drone`) |
+| Capstone 040 (`ats-000-capstone-040`) | `deck-a`, `deck-b`, `deck-c` |
+| Playground `ats-000-playground-050-01` and lab `ats-000-lab-050-01-01` | `config-lab` (`site`) and `vault-lab` (`gate`, missing ConfigMap and Secret) |
+| Playground `ats-000-playground-050-02` and lab `ats-000-lab-050-02-01` | `rollout-lab` (`shuttle`) and `release-lab` (`engine`, bad second revision) |
+| Capstone 050 (`ats-000-capstone-050`) | `cargo-lab` |
+| Playground `ats-000-playground-060-01` and lab `ats-000-lab-060-01-01` | `clinic-lab` (six faults) and `mixed-lab` (`frontend`, Service `front` with a wrong selector or port) |
+| Capstone 060 (`ats-000-capstone-060`) | `drill-lab`: four faults |
 
 Playgrounds sit in `module-0N/playground/`; each landing page carries
 `<!-- astrona:playground -->` and each summary page ends with
@@ -285,9 +302,12 @@ Playgrounds sit in `module-0N/playground/`; each landing page carries
 
 ### Environment facts the text must respect
 
-- **Labs use `bootstrap.manifests`, not scripts.** `config.yaml` applies
-  the `manifests/` folder and waits for the node. There are no `bootstrap/`
-  or `solution/apply.sh` scripts. The only scripts are the two
+- **Labs use `bootstrap.manifests`, not scripts, except the rollout labs.**
+  `config.yaml` applies the `manifests/` folder and waits for the node. The
+  rollout labs (`ats-000-lab-050-02-01` and `ats-000-capstone-050`) use a
+  `bootstrap/setup.sh` that applies release one, waits for it, then applies
+  release two, so a real revision history exists. There are no
+  `solution/apply.sh` scripts. The only scripts are the two
   `validation/validate-flicker-default-command.sh` files (module 020-02 and
   capstone 020), which check that the `flicker` container has no `command`
   or `args` override.
@@ -319,11 +339,11 @@ Playgrounds sit in `module-0N/playground/`; each landing page carries
 | --- | --- |
 | Course outline the platform reads: every reading page and lab, in order. Never list `solution.md` here | `astrona.yaml` |
 | Overview, install steps, lab table | `README.md` |
-| Section overview and its modules | `sections/section-010/README.md`, `sections/section-020/README.md` |
+| Section overview and its modules | `sections/section-0N0/README.md` (010 to 060) |
 | Module reading: landing page, parts, summary | `sections/section-0N0/module-0M/course.md`, `course-0N-*.md` (the last one is `course-0N-summary.md`) |
-| Graded labs | `sections/section-010/module-01/labs/lab-01/`, `sections/section-010/capstone/labs/lab-01/`, `sections/section-020/module-01/labs/lab-01/`, `sections/section-020/module-02/labs/lab-01/`, `sections/section-020/capstone/labs/lab-01/` |
-| Playgrounds | `sections/section-010/module-01/playground/`, `sections/section-020/module-01/playground/`, `sections/section-020/module-02/playground/` |
-| Quizzes | `sections/section-010/quiz.yaml`, `sections/section-020/quiz.yaml`, `sections/final-domain-quiz.yaml` |
+| Graded labs | `sections/section-010/module-01/labs/lab-01/`, `sections/section-010/capstone/labs/lab-01/`, `sections/section-020/module-01/labs/lab-01/`, `sections/section-020/module-02/labs/lab-01/`, `sections/section-020/capstone/labs/lab-01/`, and the same pattern for sections 030 to 060 (060 has one module lab) |
+| Playgrounds | `sections/section-010/module-01/playground/`, `sections/section-020/module-01/playground/`, `sections/section-020/module-02/playground/`, and the same pattern for 030 to 060 |
+| Quizzes | `sections/section-010/quiz.yaml`, `sections/section-020/quiz.yaml`, `sections/section-030/quiz.yaml` to `sections/section-060/quiz.yaml`, `sections/final-domain-quiz.yaml` |
 | Continuous integration: `astrona validate` and `astrona test` on every pull request | `.github/workflows/labs.yml` |
 
 A lab folder holds:
@@ -401,7 +421,12 @@ Every `type: lab` entry carries these fields, in this order:
 - Changing the cluster: `kubectl-set-image`, `kubectl-edit`, `kubectl-apply`,
   `replicas`
 - Failure signatures: `imagepullbackoff`, `errimagepull`, `crashloopbackoff`,
-  `pending`
+  `pending`, `createcontainerconfigerror`
+- Terminal and files: `terminal`, `yaml`, `dry-run`
+- More kubectl: `kubectl-exec`, `kubectl-port-forward`
+- Configuration: `configmap`, `secret`
+- Releases: `rollout`, `rollback`
+- Networking: `service`, `endpoints`, `selector`
 
 ### Running things
 

@@ -1,0 +1,87 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+#
+# Capstone: The Four-Fault Drill. UNTESTED: built and statically checked only.
+# A capstone: four faults on one planet, one for each clue place: an image tag,
+# an Events message, a log message and a Service selector.
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-000-capstone-060
+  docs:
+    examQuestion: question.md
+    guide: solution.md
+    prerequisites: docs/prerequisites.md
+    caseStudy: docs/case-study.md
+
+runtime:
+  type: kind
+  kind:
+    preloadImages:
+      - nginx:1.27-alpine
+
+bootstrap:
+  manifests:
+    - name: drill-lab namespace with alpha, beta, gamma and delta
+      type: folder
+      source: manifests/
+  waitFor:
+    - resource: nodes
+      all: true
+
+testing:
+  manifests:
+    - name: reference solution
+      type: folder
+      source: solution/
+  waitFor:
+    - resource: deploy/alpha
+      namespace: drill-lab
+    - resource: deploy/beta
+      namespace: drill-lab
+    - resource: deploy/gamma
+      namespace: drill-lab
+
+validation:
+  checks:
+    - name: "alpha runs the image nginx:1.27-alpine"
+      type: jsonpath
+      resource: deploy/alpha -n drill-lab
+      jsonpath: "{.spec.template.spec.containers[0].image}"
+      expect: "nginx:1.27-alpine"
+      hint: "The status shows an image pull problem. Read the Events."
+    - name: "alpha has 1 ready pod"
+      type: jsonpath
+      resource: deploy/alpha -n drill-lab
+      jsonpath: "{.status.readyReplicas}"
+      expect: "1"
+      points: 2
+      hint: "Fix the image of the Deployment and wait."
+    - name: "beta has 1 ready pod"
+      type: jsonpath
+      resource: deploy/beta -n drill-lab
+      jsonpath: "{.status.readyReplicas}"
+      expect: "1"
+      points: 2
+      hint: "The pod is Pending. The Events say why. Lower the memory request."
+    - name: "gamma sets MODE to on"
+      type: jsonpath
+      resource: deploy/gamma -n drill-lab
+      jsonpath: "{.spec.template.spec.containers[0].env[?(@.name=='MODE')].value}"
+      expect: "on"
+      hint: "The pod crashes. Its log says what is missing."
+    - name: "gamma has 1 ready pod"
+      type: jsonpath
+      resource: deploy/gamma -n drill-lab
+      jsonpath: "{.status.readyReplicas}"
+      expect: "1"
+      points: 2
+      hint: "After the variable is set, wait for the new pod."
+    - name: "the Service delta selects app=delta-web"
+      type: jsonpath
+      resource: svc/delta -n drill-lab
+      jsonpath: "{.spec.selector.app}"
+      expect: "delta-web"
+      points: 2
+      hint: "kubectl get endpoints delta is empty. Compare the selector with the pod labels."
+
+teardown:
+  keepCluster: false

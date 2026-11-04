@@ -1,0 +1,28 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+#
+# Roll Out And Roll Back (PLAYGROUND).
+# A clean sandbox with one healthy Deployment, `shuttle`, at revision 1, to practise
+# updates, history, rollback, pause and restart. No task, no grading.
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-000-playground-050-02
+  docs:
+    guide: docs/overview.md
+
+runtime:
+  type: kind
+  kind:
+    preloadImages:
+      - nginx:1.27-alpine
+
+bootstrap:
+  manifests:
+    - name: rollout-lab namespace with the shuttle Deployment
+      type: folder
+      source: manifests/
+  waitFor:
+    - resource: nodes
+      all: true
+
+teardown:
+  keepCluster: false

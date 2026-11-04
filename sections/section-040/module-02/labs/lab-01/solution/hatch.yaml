@@ -1,0 +1,22 @@
+# Reference result only: the note is written when the container starts. A student writes it with kubectl exec.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hatch
+  namespace: bay-lab
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hatch
+  template:
+    metadata:
+      labels:
+        app: hatch
+    spec:
+      containers:
+        - name: web
+          image: nginx:1.27-alpine
+          command: ["sh", "-c", "echo docked > /usr/share/nginx/html/status.txt; exec nginx -g 'daemon off;'"]
+          ports:
+            - containerPort: 80
